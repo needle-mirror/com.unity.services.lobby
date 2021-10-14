@@ -5,6 +5,21 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-pre.6] - 2021-10-14
+
+### Changed
+
+* Updated License.md.
+* SDK is now generated with v0.7.0.
+* Updated package dependency versions.
+* Fixed testproject scene and gamemanager to use JoinCode to join Lobbies.
+
+## [1.0.0-pre.5] - 2021-09-15
+
+### Changed
+
+* Update project file to include Lobby documentation link
+
 ## [1.0.0-pre.4] - 2021-08-19
 
 ### Changed

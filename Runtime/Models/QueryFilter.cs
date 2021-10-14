@@ -163,7 +163,13 @@ namespace Unity.Services.Lobbies.Models
             /// Enum N5 for value: N5
             /// </summary>
             [EnumMember(Value = "N5")]
-            N5 = 15
+            N5 = 15,
+
+            /// <summary>
+            /// Enum IsLocked for value: IsLocked
+            /// </summary>
+            [EnumMember(Value = "IsLocked")]
+            IsLocked = 16
 
         }
 

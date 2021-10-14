@@ -25,6 +25,7 @@ namespace Unity.Services.Lobbies.Models
     /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from name.</param>
     /// <param name="maxPlayers">The maximum number of players allowed in the lobby.</param>
     /// <param name="isPrivate">Indicates whether or not the lobby is publicly visible and will show up in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+    /// <param name="isLocked">Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.</param>
     /// <param name="player">player param</param>
     /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
     /// </summary>
@@ -39,14 +40,16 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from name.</param>
         /// <param name="maxPlayers">The maximum number of players allowed in the lobby.</param>
         /// <param name="isPrivate">Indicates whether or not the lobby is publicly visible and will show up in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+        /// <param name="isLocked">Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.</param>
         /// <param name="player">player param</param>
         /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
         [Preserve]
-        public CreateRequest(string name, int maxPlayers, bool? isPrivate = false, Player player = default, Dictionary<string, DataObject> data = default)
+        public CreateRequest(string name, int maxPlayers, bool? isPrivate = false, bool? isLocked = false, Player player = default, Dictionary<string, DataObject> data = default)
         {
             Name = name;
             MaxPlayers = maxPlayers;
             IsPrivate = isPrivate;
+            IsLocked = isLocked;
             Player = player;
             Data = data;
         }
@@ -69,6 +72,12 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool? IsPrivate{ get; }
+        /// <summary>
+        /// Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "isLocked", EmitDefaultValue = true)]
+        public bool? IsLocked{ get; }
         /// <summary>
         /// 
         /// </summary>

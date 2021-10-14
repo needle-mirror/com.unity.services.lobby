@@ -295,11 +295,11 @@ public class LobbyHelloWorld : MonoBehaviour
                 Player = loggedInPlayer, // Including the player here lets us join with data pre-populated
                 Filter = new List<QueryFilter>
                 {
-                    // Let's search for lobbies with a custom game mode set
+                    // Let's search for lobbies with a specific name
                     new QueryFilter(
-                        field: QueryFilter.FieldOptions.S2,
+                        field: QueryFilter.FieldOptions.Name,
                         op: QueryFilter.OpOptions.EQ,
-                        value: "ctf"),
+                        value: "My New Lobby"),
 
                     // You can add more filters here, such as filters on custom data fields
                 }
@@ -307,7 +307,16 @@ public class LobbyHelloWorld : MonoBehaviour
         }
         catch (LobbyServiceException ex)
         {
-            Debug.LogException(ex);
+            if (ex.Reason == LobbyExceptionReason.NoOpenLobbies)
+            {
+                Debug.LogWarning("QuickJoin has failed because there are no lobbies to join. " +
+                    "If you are running the HelloWorld sample for the first time, this is expected.\n" +
+                    "Try using a second client to create a new lobby that matches the name filter above, then try to QuickJoin again.");
+            }
+            else
+            {
+                Debug.LogException(ex);
+            }
         }
 
         // If we didn't find a lobby, abort run

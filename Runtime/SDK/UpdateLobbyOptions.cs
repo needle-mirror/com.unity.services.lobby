@@ -27,6 +27,11 @@ namespace Unity.Services.Lobbies
         public bool? IsPrivate { get; set; }
 
         /// <summary>
+        /// Indicates whether or not the lobby is locked.
+        /// </summary>
+        public bool? IsLocked { get; set; }
+
+        /// <summary>
         /// Custom game-specific properties to add, update, or remove from the lobby (e.g. mapName or gameType).
         /// To remove an existing property, include it in data but set the property object to null. To update the value to null, set the value property of the object to null.
         /// </summary>

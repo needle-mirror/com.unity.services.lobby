@@ -30,6 +30,7 @@ namespace Unity.Services.Lobbies.Models
     /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
     /// <param name="availableSlots">The number of remaining open slots for players before the lobby becomes full.</param>
     /// <param name="isPrivate">Whether the lobby is private or not. Private lobbies do not appear in query results.</param>
+    /// <param name="isLocked">Whether the lobby is locked or not. Locked lobbies cannot be joined.</param>
     /// <param name="players">The members of the lobby.</param>
     /// <param name="data">Properties of the lobby set by the host.</param>
     /// <param name="hostId">The ID of the player that is the lobby host.</param>
@@ -52,13 +53,14 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
         /// <param name="availableSlots">The number of remaining open slots for players before the lobby becomes full.</param>
         /// <param name="isPrivate">Whether the lobby is private or not. Private lobbies do not appear in query results.</param>
+        /// <param name="isLocked">Whether the lobby is locked or not. Locked lobbies cannot be joined.</param>
         /// <param name="players">The members of the lobby.</param>
         /// <param name="data">Properties of the lobby set by the host.</param>
         /// <param name="hostId">The ID of the player that is the lobby host.</param>
         /// <param name="created">When the lobby was created. The timestamp is in UTC and conforms to ISO 8601.</param>
         /// <param name="lastUpdated">When the lobby was last updated. The timestamp is in UTC and conforms to ISO 8601.</param>
         [Preserve]
-        public Lobby(string id = default, string lobbyCode = default, string upid = default, string environmentId = default, string name = default, int maxPlayers = default, int availableSlots = default, bool isPrivate = default, List<Player> players = default, Dictionary<string, DataObject> data = default, string hostId = default, DateTime created = default, DateTime lastUpdated = default)
+        public Lobby(string id = default, string lobbyCode = default, string upid = default, string environmentId = default, string name = default, int maxPlayers = default, int availableSlots = default, bool isPrivate = default, bool isLocked = default, List<Player> players = default, Dictionary<string, DataObject> data = default, string hostId = default, DateTime created = default, DateTime lastUpdated = default)
         {
             Id = id;
             LobbyCode = lobbyCode;
@@ -68,6 +70,7 @@ namespace Unity.Services.Lobbies.Models
             MaxPlayers = maxPlayers;
             AvailableSlots = availableSlots;
             IsPrivate = isPrivate;
+            IsLocked = isLocked;
             Players = players;
             Data = data;
             HostId = hostId;
@@ -123,6 +126,12 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool IsPrivate{ get; }
+        /// <summary>
+        /// Whether the lobby is locked or not. Locked lobbies cannot be joined.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "isLocked", EmitDefaultValue = true)]
+        public bool IsLocked{ get; }
         /// <summary>
         /// The members of the lobby.
         /// </summary>

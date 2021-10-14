@@ -648,6 +648,120 @@ namespace Unity.Services.Lobbies.Lobby
         }
     }
     /// <summary>
+    /// GetTokensRequest
+    /// Get authentication tokens
+    /// </summary>
+    [Preserve]
+    internal class GetTokensRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for tokenType </summary>
+        [Preserve]
+        public List<string> TokenType { get; }
+        
+        /// <summary>Accessor for lobbyId </summary>
+        [Preserve]
+        
+        public string LobbyId { get; }
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// GetTokens Request Object.
+        /// Get authentication tokens
+        /// </summary>
+        /// <param name="tokenType">tokenType param</param>
+        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        [Preserve]
+        public GetTokensRequest(List<string> tokenType, string lobbyId)
+        {
+            TokenType = tokenType;
+                        
+            LobbyId = lobbyId;
+
+
+            PathAndQueryParams = $"/{lobbyId}/tokens";
+
+            List<string> queryParams = new List<string>();
+
+            if(TokenType != null)
+            {
+                var tokenTypeStringValues = TokenType.Select(v => v.ToString()).ToList();
+                queryParams = AddParamsToQueryParams(queryParams, "tokenType", tokenTypeStringValues, "form", true);
+            }
+            if (queryParams.Count > 0)
+            {
+                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
+            }
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            string[] contentTypes = {
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
     /// HeartbeatRequest
     /// Heartbeat a lobby
     /// </summary>

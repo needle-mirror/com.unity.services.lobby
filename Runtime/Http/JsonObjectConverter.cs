@@ -23,7 +23,7 @@ namespace Unity.Services.Lobbies.Http
     /// types.
     /// </summary>
     [Preserve]
-    internal class JsonObjectConverter : JsonConverter
+    public class JsonObjectConverter : JsonConverter
     {
         ///<inheritdoc cref="JsonConverter"/>
         /// <summary>Convert a JsonObject to JToken.</summary>

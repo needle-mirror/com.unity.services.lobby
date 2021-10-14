@@ -117,7 +117,7 @@ namespace Unity.Services.Lobbies
             {
                 throw new ArgumentNullException(nameof(options), "Update Lobby Options object must not be null.");
             }
-            var updateRequest = options == null ? null : new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.Data, options.HostId);
+            var updateRequest = options == null ? null : new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId);
             var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest);
             var response = await TryCatchRequest(LobbyApiClient.UpdateLobbyAsync, updateLobbyRequest);
             return response.Result;

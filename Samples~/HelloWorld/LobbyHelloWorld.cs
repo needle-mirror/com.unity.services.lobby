@@ -66,7 +66,7 @@ public class LobbyHelloWorld : MonoBehaviour
         // This is so that orphan lobbies aren't left around in case the demo fails partway through
         if (currentLobby != null && currentLobby.HostId.Equals(localPlayerId))
         {
-            await Lobbies.Instance.DeleteLobbyAsync(currentLobby.Id);
+            await LobbyService.Instance.DeleteLobbyAsync(currentLobby.Id);
             Debug.Log($"Deleted lobby {currentLobby.Name} ({currentLobby.Id})");
         }
     }
@@ -130,7 +130,7 @@ public class LobbyHelloWorld : MonoBehaviour
         };
 
         // Call the Query API
-        QueryResponse response = await Lobbies.Instance.QueryLobbiesAsync(new QueryLobbiesOptions()
+        QueryResponse response = await LobbyService.Instance.QueryLobbiesAsync(new QueryLobbiesOptions()
         {
             Count = 20, // Override default number of results to return
             Filters = queryFilters,
@@ -151,7 +151,7 @@ public class LobbyHelloWorld : MonoBehaviour
             // Player is optional because the service can pull the player data from the auth token
             // However, if your player has custom data, you will want to pass the Player object into this call
             // This will save you having to do a Join call followed by an UpdatePlayer call
-            currentLobby = await Lobbies.Instance.JoinLobbyByIdAsync(
+            currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(
                 lobbyId: randomLobby.Id,
                 options: new JoinLobbyByIdOptions()
                 {
@@ -163,7 +163,7 @@ public class LobbyHelloWorld : MonoBehaviour
             // You can also join via a Lobby Code instead of a lobby ID
             // Lobby Codes are a short, unique codes that map to a specific lobby ID
             // EX:
-            // currentLobby = await Lobbies.Instance.JoinLobbyByCodeAsync("myLobbyJoinCode");
+            // currentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync("myLobbyJoinCode");
         }
         else // Didn't find any lobbies, create a new lobby
         {
@@ -177,7 +177,7 @@ public class LobbyHelloWorld : MonoBehaviour
             };
 
             // Create a new lobby
-            currentLobby = await Lobbies.Instance.CreateLobbyAsync(
+            currentLobby = await LobbyService.Instance.CreateLobbyAsync(
                 lobbyName: newLobbyName,
                 maxPlayers: maxPlayers,
                 options: new CreateLobbyOptions()
@@ -205,7 +205,7 @@ public class LobbyHelloWorld : MonoBehaviour
             new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "Only lobby members see this"));
 
         // Update the lobby
-        currentLobby = await Lobbies.Instance.UpdatePlayerAsync(
+        currentLobby = await LobbyService.Instance.UpdatePlayerAsync(
             lobbyId: currentLobby.Id,
             playerId: loggedInPlayer.Id,
             options: new UpdatePlayerOptions()
@@ -217,14 +217,14 @@ public class LobbyHelloWorld : MonoBehaviour
         Debug.Log("Updated lobby info:\n" + JsonConvert.SerializeObject(currentLobby));
 
         // Let's poll for the lobby data again just to see what it looks like
-        currentLobby = await Lobbies.Instance.GetLobbyAsync(currentLobby.Id);
+        currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
 
         Debug.Log("Latest lobby info:\n" + JsonConvert.SerializeObject(currentLobby));
 
         if (!currentLobby.HostId.Equals(loggedInPlayer.Id))
         {
             // Since we're not the lobby host, let's just leave the lobby
-            await Lobbies.Instance.RemovePlayerAsync(
+            await LobbyService.Instance.RemovePlayerAsync(
                 lobbyId: currentLobby.Id,
                 playerId: loggedInPlayer.Id);
 
@@ -253,7 +253,7 @@ public class LobbyHelloWorld : MonoBehaviour
                 new DataObject(DataObject.VisibilityOptions.Member, "Only lobby members see this"));
 
             // OK, now let's try to push these local changes to the service
-            currentLobby = await Lobbies.Instance.UpdateLobbyAsync(
+            currentLobby = await LobbyService.Instance.UpdateLobbyAsync(
                 lobbyId: currentLobby.Id,
                 options: new UpdateLobbyOptions()
                 {
@@ -266,14 +266,14 @@ public class LobbyHelloWorld : MonoBehaviour
 
             // Since we're the host, let's wait a second and then heartbeat the lobby
             await Task.Delay(1000);
-            await Lobbies.Instance.SendHeartbeatPingAsync(currentLobby.Id);
+            await LobbyService.Instance.SendHeartbeatPingAsync(currentLobby.Id);
 
             // Let's print the updated lobby.  The LastUpdated time should be different.
             Debug.Log($"Heartbeated lobby {currentLobby.Name} ({currentLobby.Id})");
             Debug.Log("Updated lobby info:\n" + JsonConvert.SerializeObject(currentLobby));
 
             // OK, we're done with the lobby - let's delete it
-            await Lobbies.Instance.DeleteLobbyAsync(currentLobby.Id);
+            await LobbyService.Instance.DeleteLobbyAsync(currentLobby.Id);
 
             Debug.Log($"Deleted lobby {currentLobby.Name} ({currentLobby.Id})");
 
@@ -290,7 +290,7 @@ public class LobbyHelloWorld : MonoBehaviour
         try
         {
             Debug.Log($"Trying to use Quick Join to find a lobby...");
-            currentLobby = await Lobbies.Instance.QuickJoinLobbyAsync(new QuickJoinLobbyOptions
+            currentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(new QuickJoinLobbyOptions
             {
                 Player = loggedInPlayer, // Including the player here lets us join with data pre-populated
                 Filter = new List<QueryFilter>
@@ -331,7 +331,7 @@ public class LobbyHelloWorld : MonoBehaviour
         Debug.Log("Lobby info:\n" + JsonConvert.SerializeObject(currentLobby));
 
         // There's not anything else we can really do here, so let's leave the lobby
-        await Lobbies.Instance.RemovePlayerAsync(
+        await LobbyService.Instance.RemovePlayerAsync(
             lobbyId: currentLobby.Id,
             playerId: loggedInPlayer.Id);
 

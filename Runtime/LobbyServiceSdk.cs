@@ -9,23 +9,23 @@
 
 
 using Unity.Services.Lobbies.Apis.Lobby;
-
+using Unity.Services.Wire.Internal;
 
 namespace Unity.Services.Lobbies
 {
     /// <summary>
     /// LobbyService
     /// </summary>
-    internal static class LobbyService
+    internal static class LobbyServiceSdk
     {
         /// <summary>
         /// The static instance of LobbyService.
         /// </summary>
-        public static ILobbyService Instance { get; internal set; }
+        public static ILobbyServiceSdk Instance { get; internal set; }
     }
 
     /// <summary> Interface for LobbyService</summary>
-    internal interface ILobbyService
+    internal interface ILobbyServiceSdk
     {
         
         /// <summary> Accessor for LobbyApi methods.</summary>
@@ -34,5 +34,7 @@ namespace Unity.Services.Lobbies
 
         /// <summary> Configuration properties for the service.</summary>
         Configuration Configuration { get; set; }
+
+        IWire Wire { get; set; }
     }
 }

@@ -23,8 +23,8 @@ namespace Unity.Services.Lobbies.Models
     /// <summary>
     /// A filter for an individual field that is applied to a query.
     /// <param name="field">The name of the field to filter on.  For custom data fields, the name of the index must be used instead of the field name.</param>
-    /// <param name="value">The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.). The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format. For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;. Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.</param>
-    /// <param name="op">The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), or &#x60;GE&#x60; (Greater Than or Equal).</param>
+    /// <param name="value">The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.).  The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format.  For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;.  Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.</param>
+    /// <param name="op">The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).</param>
     /// </summary>
 
     [Preserve]
@@ -35,8 +35,8 @@ namespace Unity.Services.Lobbies.Models
         /// A filter for an individual field that is applied to a query.
         /// </summary>
         /// <param name="field">The name of the field to filter on.  For custom data fields, the name of the index must be used instead of the field name.</param>
-        /// <param name="value">The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.). The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format. For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;. Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.</param>
-        /// <param name="op">The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), or &#x60;GE&#x60; (Greater Than or Equal).</param>
+        /// <param name="value">The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.).  The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format.  For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;.  Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.</param>
+        /// <param name="op">The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).</param>
         [Preserve]
         public QueryFilter(FieldOptions field, string value, OpOptions op)
         {
@@ -53,13 +53,13 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "field", IsRequired = true, EmitDefaultValue = true)]
         public FieldOptions Field{ get; }
         /// <summary>
-        /// The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.). The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format. For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;. Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.
+        /// The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.).  The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format.  For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;.  Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.
         /// </summary>
         [Preserve]
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public string Value{ get; }
         /// <summary>
-        /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), or &#x60;GE&#x60; (Greater Than or Equal).
+        /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).
         /// </summary>
         [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -175,9 +175,9 @@ namespace Unity.Services.Lobbies.Models
 
 
         /// <summary>
-        /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), or &#x60;GE&#x60; (Greater Than or Equal).
+        /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).
         /// </summary>
-        /// <value>The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), or &#x60;GE&#x60; (Greater Than or Equal).</value>
+        /// <value>The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).</value>
         [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         public enum OpOptions

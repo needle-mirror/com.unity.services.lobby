@@ -363,7 +363,7 @@ namespace Unity.Services.Lobbies.Lobby
         /// DeleteLobby Request Object.
         /// Delete a lobby
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
         [Preserve]
         public DeleteLobbyRequest(string lobbyId)
         {
@@ -561,7 +561,7 @@ namespace Unity.Services.Lobbies.Lobby
         /// GetLobby Request Object.
         /// Get lobby details
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
         [Preserve]
         public GetLobbyRequest(string lobbyId)
         {
@@ -573,120 +573,6 @@ namespace Unity.Services.Lobbies.Lobby
 
             List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
-        }
-
-        /// <summary>
-        /// Helper function for constructing URL from request base path and
-        /// query params.
-        /// </summary>
-        /// <param name="requestBasePath"></param>
-        /// <returns></returns>
-        public string ConstructUrl(string requestBasePath)
-        {
-            return requestBasePath + PathAndQueryParams;
-        }
-
-        /// <summary>
-        /// Helper for constructing the request body.
-        /// </summary>
-        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
-        public byte[] ConstructBody()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Helper function for constructing the headers.
-        /// </summary>
-        /// <param name="accessToken">The auth access token to use.</param>
-        /// <param name="operationConfiguration">The operation configuration to use.</param>
-        /// <returns>A dictionary representing the request headers.</returns>
-        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
-            Configuration operationConfiguration = null)
-        {
-            var headers = new Dictionary<string, string>();
-            if(!string.IsNullOrEmpty(accessToken.AccessToken))
-            {
-                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
-            }
-
-            string[] contentTypes = {
-            };
-
-            string[] accepts = {
-                "application/json",
-                "application/problem+json"
-            };
-
-            var acceptHeader = GenerateAcceptHeader(accepts);
-            if (!string.IsNullOrEmpty(acceptHeader))
-            {
-                headers.Add("Accept", acceptHeader);
-            }
-            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
-            if (!string.IsNullOrEmpty(contentTypeHeader))
-            {
-                headers.Add("Content-Type", contentTypeHeader);
-            }
-
-
-            // We also check if there are headers that are defined as part of
-            // the request configuration.
-            if (operationConfiguration != null && operationConfiguration.Headers != null)
-            {
-                foreach (var pair in operationConfiguration.Headers)
-                {
-                    headers[pair.Key] = pair.Value;
-                }
-            }
-
-            return headers;
-        }
-    }
-    /// <summary>
-    /// GetTokensRequest
-    /// Get authentication tokens
-    /// </summary>
-    [Preserve]
-    internal class GetTokensRequest : LobbyApiBaseRequest
-    {
-        /// <summary>Accessor for tokenType </summary>
-        [Preserve]
-        public List<string> TokenType { get; }
-        
-        /// <summary>Accessor for lobbyId </summary>
-        [Preserve]
-        
-        public string LobbyId { get; }
-        string PathAndQueryParams;
-
-        /// <summary>
-        /// GetTokens Request Object.
-        /// Get authentication tokens
-        /// </summary>
-        /// <param name="tokenType">tokenType param</param>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
-        [Preserve]
-        public GetTokensRequest(List<string> tokenType, string lobbyId)
-        {
-            TokenType = tokenType;
-                        
-            LobbyId = lobbyId;
-
-
-            PathAndQueryParams = $"/{lobbyId}/tokens";
-
-            List<string> queryParams = new List<string>();
-
-            if(TokenType != null)
-            {
-                var tokenTypeStringValues = TokenType.Select(v => v.ToString()).ToList();
-                queryParams = AddParamsToQueryParams(queryParams, "tokenType", tokenTypeStringValues, "form", true);
-            }
             if (queryParams.Count > 0)
             {
                 PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
@@ -782,7 +668,7 @@ namespace Unity.Services.Lobbies.Lobby
         /// Heartbeat Request Object.
         /// Heartbeat a lobby
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
         /// <param name="body">body param</param>
         [Preserve]
         public HeartbeatRequest(string lobbyId, object body = default(object))
@@ -1002,7 +888,7 @@ namespace Unity.Services.Lobbies.Lobby
         /// JoinLobbyById Request Object.
         /// Join a lobby with lobby ID
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
         /// <param name="player">Player param</param>
         [Preserve]
         public JoinLobbyByIdRequest(string lobbyId, Player player = default(Player))
@@ -1310,6 +1196,120 @@ namespace Unity.Services.Lobbies.Lobby
         }
     }
     /// <summary>
+    /// ReconnectRequest
+    /// Reconnect to a lobby after disconnecting
+    /// </summary>
+    [Preserve]
+    internal class ReconnectRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for lobbyId </summary>
+        [Preserve]
+        
+        public string LobbyId { get; }
+        /// <summary>Accessor for body </summary>
+        [Preserve]
+        public object Body { get; }
+        
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// Reconnect Request Object.
+        /// Reconnect to a lobby after disconnecting
+        /// </summary>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="body">body param</param>
+        [Preserve]
+        public ReconnectRequest(string lobbyId, object body = default(object))
+        {
+            
+            LobbyId = lobbyId;
+            Body = body;
+            
+
+            PathAndQueryParams = $"/{lobbyId}/reconnect";
+
+            List<string> queryParams = new List<string>();
+
+            if (queryParams.Count > 0)
+            {
+                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
+            }
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            if(Body != null)
+            {
+                return ConstructBody(Body);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            string[] contentTypes = {
+                "application/json"
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
     /// RemovePlayerRequest
     /// Remove a player
     /// </summary>
@@ -1330,8 +1330,8 @@ namespace Unity.Services.Lobbies.Lobby
         /// RemovePlayer Request Object.
         /// Remove a player
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
-        /// <param name="playerId">The id of the player to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="playerId">The ID of the player to execute the request against.</param>
         [Preserve]
         public RemovePlayerRequest(string lobbyId, string playerId)
         {
@@ -1419,6 +1419,116 @@ namespace Unity.Services.Lobbies.Lobby
         }
     }
     /// <summary>
+    /// RequestTokensRequest
+    /// Authentication token request
+    /// </summary>
+    [Preserve]
+    internal class RequestTokensRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for lobbyId </summary>
+        [Preserve]
+        
+        public string LobbyId { get; }
+        /// <summary>Accessor for tokenRequest </summary>
+        [Preserve]
+        public List<TokenRequest> TokenRequest { get; }
+        
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// RequestTokens Request Object.
+        /// Authentication token request
+        /// </summary>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="tokenRequest">TokenRequest param</param>
+        [Preserve]
+        public RequestTokensRequest(string lobbyId, List<TokenRequest> tokenRequest)
+        {
+            
+            LobbyId = lobbyId;
+            TokenRequest = tokenRequest;
+            
+
+            PathAndQueryParams = $"/{lobbyId}/tokens";
+
+            List<string> queryParams = new List<string>();
+
+            if (queryParams.Count > 0)
+            {
+                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
+            }
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            return ConstructBody(TokenRequest);
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            string[] contentTypes = {
+                "application/json"
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
     /// UpdateLobbyRequest
     /// Update lobby data
     /// </summary>
@@ -1439,7 +1549,7 @@ namespace Unity.Services.Lobbies.Lobby
         /// UpdateLobby Request Object.
         /// Update lobby data
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
         /// <param name="updateRequest">UpdateRequest param</param>
         [Preserve]
         public UpdateLobbyRequest(string lobbyId, UpdateRequest updateRequest = default(UpdateRequest))
@@ -1557,8 +1667,8 @@ namespace Unity.Services.Lobbies.Lobby
         /// UpdatePlayer Request Object.
         /// Update player data
         /// </summary>
-        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
-        /// <param name="playerId">The id of the player to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="playerId">The ID of the player to execute the request against.</param>
         /// <param name="playerUpdateRequest">PlayerUpdateRequest param</param>
         [Preserve]
         public UpdatePlayerRequest(string lobbyId, string playerId, PlayerUpdateRequest playerUpdateRequest = default(PlayerUpdateRequest))

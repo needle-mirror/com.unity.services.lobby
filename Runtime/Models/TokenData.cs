@@ -21,39 +21,39 @@ using Unity.Services.Lobbies.Http;
 namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
-    /// The type and value of a token.
-    /// <param name="tokenType">The type of token.</param>
+    /// The data associated with the token.
     /// <param name="tokenValue">The value of the token.</param>
+    /// <param name="uri">The URI of the token, if applicable.</param>
     /// </summary>
 
     [Preserve]
     [DataContract(Name = "TokenData")]
-    internal class TokenData
+    public class TokenData
     {
         /// <summary>
-        /// The type and value of a token.
+        /// The data associated with the token.
         /// </summary>
-        /// <param name="tokenType">The type of token.</param>
         /// <param name="tokenValue">The value of the token.</param>
+        /// <param name="uri">The URI of the token, if applicable.</param>
         [Preserve]
-        public TokenData(string tokenType = default, string tokenValue = default)
+        public TokenData(string tokenValue = default, string uri = default)
         {
-            TokenType = tokenType;
             TokenValue = tokenValue;
+            Uri = uri;
         }
 
-        /// <summary>
-        /// The type of token.
-        /// </summary>
-        [Preserve]
-        [DataMember(Name = "tokenType", EmitDefaultValue = false)]
-        public string TokenType{ get; }
         /// <summary>
         /// The value of the token.
         /// </summary>
         [Preserve]
         [DataMember(Name = "tokenValue", EmitDefaultValue = false)]
         public string TokenValue{ get; }
+        /// <summary>
+        /// The URI of the token, if applicable.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "uri", EmitDefaultValue = false)]
+        public string Uri{ get; }
     
     }
 }

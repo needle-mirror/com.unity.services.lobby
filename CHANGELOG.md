@@ -5,6 +5,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2022-05-13
+
+### Changed
+
+* Added Vivox / Lobby integration.
+* Adding Reconnect API functionality.
+* Stability improvements.
+
+## [1.0.0-pre.7] - 2022-03-09
+
+### Changed
+
+* Introduced LobbyEvents functionality to allow receiving runtime updates when used with the Wire package.
+* Replaced "Lobbies" and "ILobbyServiceSDK", replaced with "LobbyService" and "ILobbyService"
+* Updating API Base Path.
+
 ## [1.0.0-pre.6] - 2021-10-14
 
 ### Changed

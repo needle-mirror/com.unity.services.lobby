@@ -22,10 +22,10 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// The body of a Create Lobby request.
-    /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from name.</param>
-    /// <param name="maxPlayers">The maximum number of players allowed in the lobby.</param>
-    /// <param name="isPrivate">Indicates whether or not the lobby is publicly visible and will show up in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
-    /// <param name="isLocked">Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.</param>
+    /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from the name.</param>
+    /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
+    /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+    /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
     /// <param name="player">player param</param>
     /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
     /// </summary>
@@ -37,10 +37,10 @@ namespace Unity.Services.Lobbies.Models
         /// <summary>
         /// The body of a Create Lobby request.
         /// </summary>
-        /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from name.</param>
-        /// <param name="maxPlayers">The maximum number of players allowed in the lobby.</param>
-        /// <param name="isPrivate">Indicates whether or not the lobby is publicly visible and will show up in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
-        /// <param name="isLocked">Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.</param>
+        /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from the name.</param>
+        /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
+        /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+        /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
         /// <param name="player">player param</param>
         /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
         [Preserve]
@@ -55,25 +55,25 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// The name of the lobby that should be displayed to users.  All whitespace will be trimmed from name.
+        /// The name of the lobby that should be displayed to users.  All whitespace will be trimmed from the name.
         /// </summary>
         [Preserve]
         [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
         public string Name{ get; }
         /// <summary>
-        /// The maximum number of players allowed in the lobby.
+        /// The maximum number of players that can be members of the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "maxPlayers", IsRequired = true, EmitDefaultValue = true)]
         public int MaxPlayers{ get; }
         /// <summary>
-        /// Indicates whether or not the lobby is publicly visible and will show up in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
+        /// Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool? IsPrivate{ get; }
         /// <summary>
-        /// Indicates whether or not the lobby is joinable. If true, lobby is locked and no players will be able to join.
+        /// Whether or not the lobby is locked.  If true, new players will not be able to join.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isLocked", EmitDefaultValue = true)]

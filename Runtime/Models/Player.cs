@@ -22,10 +22,10 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// Information about a specific player creating, joining, or already in a lobby.
-    /// <param name="id">The unique identifier for the player.  If not provided for a create or join request it will be set to the id of the caller.</param>
-    /// <param name="connectionInfo">(TBD) Connection information for connecting to a relay with this player.</param>
+    /// <param name="id">The unique identifier for the player.  If not provided for a create or join request, it will be set to the ID of the caller.</param>
+    /// <param name="connectionInfo">Connection information for connecting to a relay with this player.</param>
     /// <param name="data">Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).</param>
-    /// <param name="allocationId">An id that associates this player in this lobby with a persistent connection.  When a disconnect notification is recevied, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
+    /// <param name="allocationId">The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
     /// <param name="joined">The time at which the player joined the lobby.</param>
     /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
     /// </summary>
@@ -37,10 +37,10 @@ namespace Unity.Services.Lobbies.Models
         /// <summary>
         /// Information about a specific player creating, joining, or already in a lobby.
         /// </summary>
-        /// <param name="id">The unique identifier for the player.  If not provided for a create or join request it will be set to the id of the caller.</param>
-        /// <param name="connectionInfo">(TBD) Connection information for connecting to a relay with this player.</param>
+        /// <param name="id">The unique identifier for the player.  If not provided for a create or join request, it will be set to the ID of the caller.</param>
+        /// <param name="connectionInfo">Connection information for connecting to a relay with this player.</param>
         /// <param name="data">Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).</param>
-        /// <param name="allocationId">An id that associates this player in this lobby with a persistent connection.  When a disconnect notification is recevied, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
+        /// <param name="allocationId">The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
         /// <param name="joined">The time at which the player joined the lobby.</param>
         /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
         [Preserve]
@@ -55,29 +55,29 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// The unique identifier for the player.  If not provided for a create or join request it will be set to the id of the caller.
+        /// The unique identifier for the player.  If not provided for a create or join request, it will be set to the ID of the caller.
         /// </summary>
         [Preserve]
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public string Id{ get; }
         /// <summary>
-        /// (TBD) Connection information for connecting to a relay with this player.
+        /// Connection information for connecting to a relay with this player.
         /// </summary>
         [Preserve]
         [DataMember(Name = "connectionInfo", EmitDefaultValue = false)]
-        public string ConnectionInfo{ get; }
+        public string ConnectionInfo{ get; internal set; }
         /// <summary>
         /// Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).
         /// </summary>
         [Preserve]
         [DataMember(Name = "data", EmitDefaultValue = false)]
-        public Dictionary<string, PlayerDataObject> Data{ get; }
+        public Dictionary<string, PlayerDataObject> Data{ get; set; }
         /// <summary>
-        /// An id that associates this player in this lobby with a persistent connection.  When a disconnect notification is recevied, this value is used to identify the associated player in a lobby to mark them as disconnected.
+        /// The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.
         /// </summary>
         [Preserve]
         [DataMember(Name = "allocationId", EmitDefaultValue = false)]
-        public string AllocationId{ get; }
+        public string AllocationId{ get; internal set; }
         /// <summary>
         /// The time at which the player joined the lobby.
         /// </summary>
@@ -89,7 +89,7 @@ namespace Unity.Services.Lobbies.Models
         /// </summary>
         [Preserve]
         [DataMember(Name = "lastUpdated", EmitDefaultValue = false)]
-        public DateTime LastUpdated{ get; }
+        public DateTime LastUpdated{ get; set; }
     
     }
 }

@@ -22,7 +22,7 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// The body of a QuickJoin request.
-    /// <param name="filter">A list of filters which can be used to narrow down which lobbies to attempt to join..</param>
+    /// <param name="filter">A list of filters which can be used to narrow down which lobbies to attempt to join.</param>
     /// <param name="player">player param</param>
     /// </summary>
 
@@ -33,7 +33,7 @@ namespace Unity.Services.Lobbies.Models
         /// <summary>
         /// The body of a QuickJoin request.
         /// </summary>
-        /// <param name="filter">A list of filters which can be used to narrow down which lobbies to attempt to join..</param>
+        /// <param name="filter">A list of filters which can be used to narrow down which lobbies to attempt to join.</param>
         /// <param name="player">player param</param>
         [Preserve]
         public QuickJoinRequest(List<QueryFilter> filter = default, Player player = default)
@@ -43,7 +43,7 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// A list of filters which can be used to narrow down which lobbies to attempt to join..
+        /// A list of filters which can be used to narrow down which lobbies to attempt to join.
         /// </summary>
         [Preserve]
         [DataMember(Name = "filter", EmitDefaultValue = false)]

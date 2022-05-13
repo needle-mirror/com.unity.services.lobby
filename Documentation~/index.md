@@ -1,8 +1,8 @@
-# Lobby Beta
+# Unity Lobby
 
-Welcome to the Lobby Beta!
+Please consult the documentation here: https://docs.unity.com/lobby/
 
-Go to the [Lobby Dashboard](https://dashboard.unity3d.com/lobby) to learn more, find documentation, and get support.
+You can also go to the [Lobby Dashboard](https://dashboard.unity3d.com/lobby) to learn more, find documentation, and get support.
 
 ## SDK Documentation
 

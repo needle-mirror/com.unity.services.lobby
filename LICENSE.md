@@ -1,4 +1,4 @@
-com.unity.services.lobby copyright © 2021 Unity Technologies.
+com.unity.services.lobby copyright © 2022 Unity Technologies.
 
 This software is subject to, and made available under, the terms of service for Unity Lobby (see https://unity3d.com/legal/one-operate-services-terms-of-service), and is an “Operate Service” as defined therein.
 

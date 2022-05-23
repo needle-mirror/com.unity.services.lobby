@@ -1,10 +1,10 @@
 {
   "name": "com.unity.services.lobby",
   "displayName": "Lobby",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "unity": "2020.3",
   "_upm": {
-    "changelog": "### Changed\n\n* Added Vivox / Lobby integration.\n* Adding Reconnect API functionality.\n* Stability improvements."
+    "changelog": "* Updating package dependency on com.unity.nuget.newtonsoft-json to 3.0.2"
   },
   "description": "Enable players to find, create, and join lobbies with Lobby. Add Lobby to your multiplayer game to empower players to create the gaming experiences they want. Features include Quick Join, Public Lobby, and Private Match to allow flexibility in how players want to game with each other.",
   "dependencies": {
@@ -14,7 +14,7 @@
     "com.unity.modules.unitywebrequestaudio": "1.0.0",
     "com.unity.modules.unitywebrequesttexture": "1.0.0",
     "com.unity.modules.unitywebrequestwww": "1.0.0",
-    "com.unity.nuget.newtonsoft-json": "3.0.1",
+    "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.services.authentication": "2.0.0"
   },
   "samples": [
@@ -25,14 +25,14 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.services.lobby.tests": "1.0.0"
+    "com.unity.services.lobby.tests": "1.0.1"
   },
   "upmCi": {
-    "footprint": "04711aa4a836100318f3339b80328bc4cf233e09"
+    "footprint": "f3f9af31588bd7974d1c8ff624587bb7c08eed26"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.services.rooms.git",
     "type": "git",
-    "revision": "1a47d89dd2108572043f815023a6050fba48fee0"
+    "revision": "7ad52169b3632cbc368538244f27229dd507fca3"
   }
 }

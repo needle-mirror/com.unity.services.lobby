@@ -20,12 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// A list of lobbies that matched the specified query.  Only the public top-level data and player data properties are returned.
-    /// <param name="results">results param</param>
-    /// <param name="continuationToken">continuationToken param</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "QueryResponse")]
     public class QueryResponse

@@ -20,12 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// The body of a Join Lobby request using lobby code.
-    /// <param name="lobbyCode">The lobby code of the lobby to join.  Mutually exclusive with &#x60;id&#x60;.  This is used to join a private lobby where the lobby code was shared to other users manually.</param>
-    /// <param name="player">player param</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "JoinByCodeRequest")]
     public class JoinByCodeRequest

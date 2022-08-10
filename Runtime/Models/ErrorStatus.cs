@@ -20,16 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// The body that will be returned for any failing request.  We are using the [RFC 7807 Error Format](https://www.rfc-editor.org/rfc/rfc7807.html#section-3.1).
-    /// <param name="type">A URI that identifies the problem type and should provide documentation for the problem.</param>
-    /// <param name="status">The HTTP status code of the response.</param>
-    /// <param name="title">A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization.</param>
-    /// <param name="detail">A human-readable explanation specific to this occurrence of the problem.</param>
-    /// <param name="code">An integer in the range 16000-16999 that uniquely identifies an error type.  This can be used to programatically identify the type of error.</param>
-    /// <param name="details">A list of additional details about specific errors.</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "ErrorStatus")]
     public class ErrorStatus

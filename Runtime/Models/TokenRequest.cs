@@ -20,11 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// Details about a token being requested.
-    /// <param name="tokenType">tokenType param</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "TokenRequest")]
     public class TokenRequest

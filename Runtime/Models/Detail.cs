@@ -20,12 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// Additional detail about an error.  This may include detailed validation failure messages, debugging information, troubleshooting steps, or more.
-    /// <param name="errorType">errorType param</param>
-    /// <param name="message">message param</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "Detail")]
     public class Detail

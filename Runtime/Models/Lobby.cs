@@ -20,24 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// Data about an individual lobby.
-    /// <param name="id">id param</param>
-    /// <param name="lobbyCode">A short code that can be used to join a lobby.  This is only visible to lobby members.  Typically this is displayed to the user so they can share it with other players out-of-game.  Users with the code can join a lobby even when it is private.</param>
-    /// <param name="upid">The Unity project ID of the game.</param>
-    /// <param name="environmentId">The ID of the environment this lobby exists in.</param>
-    /// <param name="name">The name of the lobby.  Typically this is shown in game UI to represent the lobby.</param>
-    /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
-    /// <param name="availableSlots">The number of remaining open slots for players before the lobby becomes full.</param>
-    /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results.</param>
-    /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
-    /// <param name="players">The members of the lobby.</param>
-    /// <param name="data">Properties of the lobby set by the host.</param>
-    /// <param name="hostId">The ID of the player that is the lobby host.</param>
-    /// <param name="created">When the lobby was created.  The timestamp is in UTC and conforms to ISO 8601.</param>
-    /// <param name="lastUpdated">When the lobby was last updated.  The timestamp is in UTC and conforms to ISO 8601.</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "Lobby")]
     public class Lobby

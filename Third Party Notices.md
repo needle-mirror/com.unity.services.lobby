@@ -1,11 +1,9 @@
 This package contains third-party software components governed by the license(s) indicated below:
 ---------
 
-Component Name: com.unity.nuget.newtonsoft-json
+Component Name: [com.unity.nuget.newtonsoft-json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/license/)
 
-License Type: Unity Companion Licence
-
-Licensed under the Unity Companion License for Unity-dependent projects--see [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License).
+License Type: [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License) for Unity-dependent products
 
 Nuget.Newtonsoft.Json copyright © 2022 Unity Technologies ApS
 

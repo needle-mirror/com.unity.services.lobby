@@ -6,6 +6,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies.Http;
 using Unity.Services.Lobbies.Lobby;
 using Debug = Unity.Services.Lobbies.Logger;
+using Unity.Services.Core;
 #if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using Unity.Services.Wire.Internal;
 #endif
@@ -20,6 +21,8 @@ namespace Unity.Services.Lobbies.Internal
     internal class WrappedLobbyService : ILobbyService, ILobbyServiceSDK, ILobbyServiceSDKConfiguration, ILobbyServiceInternal
 #pragma warning restore CS0618
     {
+        const int k_CommonErrorCodeRange = 100;
+
         internal ILobbyServiceSdk m_LobbyService;
 
         //Minimum value of a lobby error (used to elevate standard errors if unhandled)
@@ -396,6 +399,10 @@ namespace Unity.Services.Lobbies.Internal
             }
             else 
             {
+                if (TryMapCommonErrorCodeToLobbyExceptionReason((int)reason, out var mappedReason))
+                {
+                    reason = mappedReason;
+                }
                 //Check if the exception is of type HttpException<ErrorStatus> - extract api user-facing message
                 HttpException<ErrorStatus> apiException = exception as HttpException<ErrorStatus>;
                 if (apiException != null)
@@ -410,6 +417,24 @@ namespace Unity.Services.Lobbies.Internal
                     throw new LobbyServiceException(reason, exception.Message, exception);
                 }
             }
+        }
+
+        private bool TryMapCommonErrorCodeToLobbyExceptionReason(int code, out LobbyExceptionReason reason)
+        {
+            if (code < k_CommonErrorCodeRange) {
+                switch (code) {
+                    case CommonErrorCodes.Unknown: reason = LobbyExceptionReason.Unknown; break;
+                    case CommonErrorCodes.ServiceUnavailable: reason = LobbyExceptionReason.ServiceUnavailable; break;
+                    case CommonErrorCodes.TooManyRequests: reason = LobbyExceptionReason.RateLimited; break;
+                    case CommonErrorCodes.Forbidden: reason = LobbyExceptionReason.Forbidden; break;
+                    case CommonErrorCodes.NotFound: reason = LobbyExceptionReason.EntityNotFound; break;
+                    case CommonErrorCodes.InvalidRequest: reason = LobbyExceptionReason.BadRequest; break;
+                    default: reason = LobbyExceptionReason.UnknownErrorCode; break;
+                }
+                return true;
+            }
+            reason = LobbyExceptionReason.Unknown;
+            return false;
         }
 
         /// <summary>
@@ -432,6 +457,12 @@ namespace Unity.Services.Lobbies.Internal
                 }
 
                 lobbyId = joinedLobbies[0];
+            }
+
+            //If lobbyId is still null, we were unable to find a corresponding lobby through GetJoinedLobbiesAsync
+            if (lobbyId == null) 
+            {
+                return null;
             }
 
             //Call GetLobby to get existing details

@@ -20,12 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// An order for an individual field that is applied to a query.
-    /// <param name="asc">Whether to sort in ascending or descending order.</param>
-    /// <param name="field">The name of the field to order on.</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "QueryOrder")]
     public class QueryOrder

@@ -20,16 +20,6 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
-    /// <summary>
-    /// Information about a specific player creating, joining, or already in a lobby.
-    /// <param name="id">The unique identifier for the player.  If not provided for a create or join request, it will be set to the ID of the caller.</param>
-    /// <param name="connectionInfo">Connection information for connecting to a relay with this player.</param>
-    /// <param name="data">Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).</param>
-    /// <param name="allocationId">The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
-    /// <param name="joined">The time at which the player joined the lobby.</param>
-    /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
-    /// </summary>
-
     [Preserve]
     [DataContract(Name = "Player")]
     public class Player

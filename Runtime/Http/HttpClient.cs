@@ -39,14 +39,14 @@ namespace Unity.Services.Lobbies.Http
         {
         }
 
-        ///<inheritdoc cref="IHttpClient/MakeRequestAsync"/>
+        ///<inheritdoc cref="IHttpClient.MakeRequestAsync(string, string, byte[], Dictionary{string, string}, int)"/>
         public async Task<HttpClientResponse> MakeRequestAsync(string method, string url, byte[] body,
             Dictionary<string, string> headers, int requestTimeout)
         {
             return await CreateWebRequestAsync(method.ToUpper(), url, body, headers, requestTimeout);
         }
 
-        ///<inheritdoc cref="IHttpClient/MakeRequestAsync"/>
+        ///<inheritdoc cref="IHttpClient.MakeRequestAsync(string, string, List{IMultipartFormSection}, Dictionary{string, string}, int, string)"/>
         public async Task<HttpClientResponse> MakeRequestAsync(string method, string url,
             List<IMultipartFormSection> body,
             Dictionary<string, string> headers, int requestTimeout, string boundary = null)

@@ -5,6 +5,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2022-08-10
+
+* Fixed a bug where ArgumentNullException would throw on LobbyConflict (HTTP 409) resolution.
+* Fixed an issue where a CommonErrorCode was being reported instead of a LobbyExceptionReason, invalidating some switch cases.
+
+## [1.0.2] - 2022-06-22
+
+* Fixed some xml docs
+
 ## [1.0.1] - 2022-05-23
 
 * Updating package dependency on com.unity.nuget.newtonsoft-json to 3.0.2

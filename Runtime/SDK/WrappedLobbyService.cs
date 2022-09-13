@@ -7,7 +7,7 @@ using Unity.Services.Lobbies.Http;
 using Unity.Services.Lobbies.Lobby;
 using Debug = Unity.Services.Lobbies.Logger;
 using Unity.Services.Core;
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
+#if UGS_LOBBY_EVENTS
 using Unity.Services.Wire.Internal;
 #endif
 

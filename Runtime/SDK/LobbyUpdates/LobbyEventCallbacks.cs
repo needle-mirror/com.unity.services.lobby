@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using System;
 using Unity.Services.Lobbies;
 
@@ -37,4 +36,3 @@ public class LobbyEventCallbacks
         LobbyEventConnectionStateChanged?.Invoke(state);
     }
 }
-#endif

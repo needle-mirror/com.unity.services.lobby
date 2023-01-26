@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -461,4 +460,3 @@ internal static class LobbyPatcher
         }
     }
 }
-#endif

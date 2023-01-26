@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using Unity.Services.Lobbies;
 
 namespace Unity.Services.Lobbies
@@ -32,4 +31,3 @@ namespace Unity.Services.Lobbies
         public static ChangedOrRemovedLobbyValue<T> Removed<T>() => ChangedOrRemovedLobbyValue<T>.RemoveThisValue;
     }
 }
-#endif

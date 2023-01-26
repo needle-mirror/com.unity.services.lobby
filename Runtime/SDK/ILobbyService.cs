@@ -25,7 +25,6 @@ namespace Unity.Services.Lobbies
         /// <exception cref="Unity.Services.Lobbies.LobbyServiceException"></exception>
         Task<Models.Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, CreateLobbyOptions options = default);
 
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
         /// <summary>
         /// A subscription to the given lobby is created and the given callbacks are associated with it.
         /// The return ILobbyEvents interface can be used to unsubscribe and re-subscribe to the connection.
@@ -35,7 +34,6 @@ namespace Unity.Services.Lobbies
         /// <param name="callbacks">The callbacks you provide, which will be called as notifications arrive from the subscription.</param>
         /// <returns>An interface to change the callbacks associated with the subscription, or to unsubscribe and re-subscribe to the lobby's events.</returns>
         Task<ILobbyEvents> SubscribeToLobbyEventsAsync(string lobbyId, LobbyEventCallbacks callbacks);
-#endif
 
         /// <summary>
         /// Delete a Lobby by specifying a Lobby ID.

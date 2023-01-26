@@ -7,9 +7,6 @@ using Unity.Services.Lobbies.Http;
 using Unity.Services.Lobbies.Lobby;
 using Debug = Unity.Services.Lobbies.Logger;
 using Unity.Services.Core;
-#if UGS_LOBBY_EVENTS
-using Unity.Services.Wire.Internal;
-#endif
 
 namespace Unity.Services.Lobbies.Internal
 {
@@ -32,14 +29,6 @@ namespace Unity.Services.Lobbies.Internal
         {
             m_LobbyService = lobbyService;
         }
-
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
-        /// <inheritdoc/>
-        public void DisableLobbyUpdates()
-        {
-            m_LobbyService.Wire = null;
-        }
-#endif
 
         /// <inheritdoc/>
         public async Task<Models.Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, CreateLobbyOptions options = default)
@@ -66,7 +55,6 @@ namespace Unity.Services.Lobbies.Internal
             return lobby;
         }
 
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
         /// <inheritdoc/>
         public async Task<ILobbyEvents> SubscribeToLobbyEventsAsync(string lobbyId, LobbyEventCallbacks lobbyEventCallbacks)
         {
@@ -79,7 +67,6 @@ namespace Unity.Services.Lobbies.Internal
             }
             return null;
         }
-#endif
 
         /// <inheritdoc/>
         public async Task DeleteLobbyAsync(string lobbyId)

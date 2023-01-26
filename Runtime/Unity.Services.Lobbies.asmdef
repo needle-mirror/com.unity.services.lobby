@@ -12,17 +12,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.unity.services.wire",
-            "expression": "",
-            "define": "UGS_LOBBY_EVENTS"
-        },
-        {
-            "name": "com.unity.services.vivox",
-            "expression": "",
-            "define": "UGS_LOBBY_VIVOX"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

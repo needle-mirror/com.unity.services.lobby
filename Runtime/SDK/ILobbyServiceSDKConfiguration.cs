@@ -14,12 +14,5 @@ namespace Unity.Services.Lobbies
         /// </summary>
         /// <param name="basePath">The base path to set in configuration.</param>
         void SetBasePath(string basePath);
-
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
-        /// <summary>
-        /// If the Wire package is available, but you do not want the Lobby package to use Wire for some reason.
-        /// </summary>
-        void DisableLobbyUpdates();
-#endif
     }
 }

@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
@@ -89,4 +88,3 @@ namespace Unity.Services.Lobbies.Internal
 
     }
 }
-#endif

@@ -32,15 +32,14 @@ namespace Unity.Services.Lobbies
 
             var accessTokenLobby = registry.GetServiceComponent<IAccessToken>();
             var wire = registry.GetServiceComponent<IWire>();
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
             if (wire == null) {
-                Debug.LogWarning($"Version define UGS_BETA_LOBBY_EVENTS is defined, but the {nameof(IWire)} component is not available. This means you do not have the Wire package in your project!");
+                Debug.LogWarning($"The {nameof(IWire)} component is not available. LobbyEvents functionality unavailable.");
             }
-#endif
 
             if (accessTokenLobby != null)
             {
                 LobbyServiceSdk.Instance = new InternalLobbyService(httpClient, registry.GetServiceComponent<IAccessToken>(), wire);
+
 #if UGS_LOBBY_VIVOX
                 var vivox = registry.GetServiceComponent<IVivox>();
                 if (vivox == null)

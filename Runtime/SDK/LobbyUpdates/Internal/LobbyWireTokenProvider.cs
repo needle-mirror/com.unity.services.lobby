@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -38,4 +37,3 @@ namespace Unity.Services.Lobbies.Internal
         }
     }
 }
-#endif

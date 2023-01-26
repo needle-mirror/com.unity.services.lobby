@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 using System.Threading.Tasks;
 
 namespace Unity.Services.Lobbies
@@ -26,4 +25,3 @@ namespace Unity.Services.Lobbies
         Task UnsubscribeAsync();
     }
 }
-#endif

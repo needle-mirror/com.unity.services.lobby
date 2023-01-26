@@ -1,4 +1,3 @@
-#if UGS_BETA_LOBBY_EVENTS && UGS_LOBBY_EVENTS
 namespace Unity.Services.Lobbies
 {
     /// <summary>
@@ -67,4 +66,3 @@ namespace Unity.Services.Lobbies
         }
     }
 }
-#endif

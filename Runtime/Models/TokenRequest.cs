@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// Details about a token being requested.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "TokenRequest")]
     public class TokenRequest
@@ -35,14 +39,13 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// 
+        /// Parameter tokenType of TokenRequest
         /// </summary>
         [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         [DataMember(Name = "tokenType", IsRequired = true, EmitDefaultValue = true)]
         public TokenTypeOptions TokenType{ get; }
     
-
         /// <summary>
         /// Defines TokenType
         /// </summary>
@@ -55,15 +58,37 @@ namespace Unity.Services.Lobbies.Models
             /// </summary>
             [EnumMember(Value = "vivoxJoin")]
             VivoxJoin = 1,
-
             /// <summary>
             /// Enum WireJoin for value: wireJoin
             /// </summary>
             [EnumMember(Value = "wireJoin")]
             WireJoin = 2
-
         }
 
+        /// <summary>
+        /// Formats a TokenRequest into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            serializedModel += "tokenType," + TokenType;
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a TokenRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            var tokenTypeStringValue = TokenType.ToString();
+            dictionary.Add("tokenType", tokenTypeStringValue);
+            
+            return dictionary;
+        }
     }
 }
-

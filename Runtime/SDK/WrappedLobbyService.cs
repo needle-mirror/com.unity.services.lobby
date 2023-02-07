@@ -33,11 +33,11 @@ namespace Unity.Services.Lobbies.Internal
         /// <inheritdoc/>
         public async Task<Models.Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, CreateLobbyOptions options = default)
         {
-            if (string.IsNullOrWhiteSpace(lobbyName)) 
+            if (string.IsNullOrWhiteSpace(lobbyName))
             {
                 throw new ArgumentNullException("lobbyName", "Argument should be non-null, non-empty & not only whitespaces.");
             }
-            if (maxPlayers < 1) 
+            if (maxPlayers < 1)
             {
                 throw new InvalidOperationException("Parameters 'maxPlayers' cannot be less than 1.");
             }
@@ -50,7 +50,41 @@ namespace Unity.Services.Lobbies.Internal
                 data: options?.Data
             );
 
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateLobbyAsync, new CreateLobbyRequest(createRequest));
+            var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateLobbyAsync, new CreateLobbyRequest(createRequest : createRequest));
+            var lobby = response.Result;
+            return lobby;
+        }
+
+        /// <inheritdoc/>
+        public async Task<Models.Lobby> CreateOrJoinLobbyAsync(string lobbyId, string lobbyName, int maxPlayers, CreateLobbyOptions createOptions = default)
+        {
+            if (string.IsNullOrWhiteSpace(lobbyId))
+            {
+                throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
+            }
+            if (string.IsNullOrWhiteSpace(lobbyName))
+            {
+                throw new ArgumentNullException("lobbyName", "Argument should be non-null, non-empty & not only whitespaces.");
+            }
+            if (maxPlayers < 1)
+            {
+                throw new InvalidOperationException("Parameters 'maxPlayers' cannot be less than 1.");
+            }
+
+            var createRequest = new CreateRequest(
+                name: lobbyName,
+                maxPlayers: maxPlayers,
+                isPrivate: createOptions?.IsPrivate,
+                player:  createOptions?.Player,
+                data: createOptions?.Data
+            );
+            var createOrJoinRequest = new CreateOrJoinLobbyRequest(
+                lobbyId: lobbyId,
+                serviceId: null,
+                createRequest: createRequest
+            );
+
+            var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateOrJoinLobbyAsync, createOrJoinRequest);
             var lobby = response.Result;
             return lobby;
         }
@@ -79,9 +113,9 @@ namespace Unity.Services.Lobbies.Internal
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> GetJoinedLobbiesAsync() 
+        public async Task<List<string>> GetJoinedLobbiesAsync()
         {
-            var request = new GetJoinedLobbiesRequest();
+            var request = new GetJoinedLobbiesRequest(null, null);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.GetJoinedLobbiesAsync, request);
             return response.Result;
         }
@@ -119,11 +153,11 @@ namespace Unity.Services.Lobbies.Internal
 
             try
             {
-                var joinRequest = new JoinLobbyByCodeRequest(new JoinByCodeRequest(lobbyCode, options?.Player));
+                var joinRequest = new JoinLobbyByCodeRequest(joinByCodeRequest: new JoinByCodeRequest(lobbyCode, options?.Player));
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByCodeAsync, joinRequest);
                 return response.Result;
             }
-            catch (LobbyServiceException e) 
+            catch (LobbyServiceException e)
             {
                 //JoinLobby conflict 409 handling (MPSSDK-92)
                 if (e.Reason == LobbyExceptionReason.LobbyConflict)
@@ -148,7 +182,7 @@ namespace Unity.Services.Lobbies.Internal
 
             try
             {
-                var joinRequest = new JoinLobbyByIdRequest(lobbyId, options?.Player);
+                var joinRequest = new JoinLobbyByIdRequest(lobbyId, player: options?.Player);
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByIdAsync, joinRequest);
                 return response.Result;
             }
@@ -171,7 +205,7 @@ namespace Unity.Services.Lobbies.Internal
         public async Task<QueryResponse> QueryLobbiesAsync(QueryLobbiesOptions options = default)
         {
             var queryRequest = options == null ? null : new QueryRequest(options.Count, options.Skip, options.SampleResults, options.Filters, options.Order, options.ContinuationToken);
-            var queryLobbiesRequest = new QueryLobbiesRequest(queryRequest);
+            var queryLobbiesRequest = new QueryLobbiesRequest(queryRequest: queryRequest);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.QueryLobbiesAsync, queryLobbiesRequest);
             return response.Result;
         }
@@ -182,7 +216,7 @@ namespace Unity.Services.Lobbies.Internal
             try
             {
                 var quickJoinRequest = options == null ? null : new QuickJoinRequest(options.Filter, options.Player);
-                var quickJoinLobbyRequest = new QuickJoinLobbyRequest(quickJoinRequest);
+                var quickJoinLobbyRequest = new QuickJoinLobbyRequest(quickJoinRequest: quickJoinRequest);
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.QuickJoinLobbyAsync, quickJoinLobbyRequest);
                 return response.Result;
             }
@@ -228,7 +262,7 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException(nameof(options), "Update Lobby Options object must not be null.");
             }
             var updateRequest = options == null ? null : new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId);
-            var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest);
+            var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest: updateRequest);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.UpdateLobbyAsync, updateLobbyRequest);
             return response.Result;
         }
@@ -244,12 +278,12 @@ namespace Unity.Services.Lobbies.Internal
             {
                 throw new ArgumentNullException("playerId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
-            if (options == null) 
+            if (options == null)
             {
                 throw new ArgumentNullException(nameof(options), "Update Player Options object must not be null.");
             }
             var playerUpdateRequest = options == null ? null : new PlayerUpdateRequest(options.ConnectionInfo, options.Data, options.AllocationId);
-            var updatePlayerRequest = new UpdatePlayerRequest(lobbyId, playerId, playerUpdateRequest);
+            var updatePlayerRequest = new UpdatePlayerRequest(lobbyId, playerId, playerUpdateRequest: playerUpdateRequest);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.UpdatePlayerAsync, updatePlayerRequest);
             return response.Result;
         }
@@ -291,7 +325,7 @@ namespace Unity.Services.Lobbies.Internal
         #region Helper Functions
 
         // Helper function to reduce code duplication of try-catch
-        private async Task<Response> TryCatchRequest<TRequest>(Func<TRequest, Configuration, Task<Response>> func, TRequest request) 
+        private async Task<Response> TryCatchRequest<TRequest>(Func<TRequest, Configuration, Task<Response>> func, TRequest request)
         {
             Response response = null;
             try
@@ -341,13 +375,13 @@ namespace Unity.Services.Lobbies.Internal
             {
                 response = await func(request, m_LobbyService.Configuration);
             }
-            catch (HttpException<ErrorStatus> he) 
+            catch (HttpException<ErrorStatus> he)
             {
-                ResolveErrorWrapping((LobbyExceptionReason) he.ActualError.Code, he);
+                ResolveErrorWrapping((LobbyExceptionReason)he.ActualError.Code, he);
             }
             catch (HttpException he)
             {
-                int httpErrorStatusCode = (int) he.Response.StatusCode;
+                int httpErrorStatusCode = (int)he.Response.StatusCode;
                 LobbyExceptionReason reason = LobbyExceptionReason.Unknown;
                 if (he.Response.IsNetworkError)
                 {
@@ -359,9 +393,9 @@ namespace Unity.Services.Lobbies.Internal
                     if (httpErrorStatusCode < 1000)
                     {
                         httpErrorStatusCode += LOBBY_ERROR_MIN_RANGE;
-                        if (Enum.IsDefined(typeof(LobbyExceptionReason), httpErrorStatusCode)) 
+                        if (Enum.IsDefined(typeof(LobbyExceptionReason), httpErrorStatusCode))
                         {
-                            reason = (LobbyExceptionReason) httpErrorStatusCode;
+                            reason = (LobbyExceptionReason)httpErrorStatusCode;
                         }
                     }
                 }
@@ -377,14 +411,14 @@ namespace Unity.Services.Lobbies.Internal
         }
 
         // Helper function to resolve the new wrapped error/exception based on input parameter
-        private void ResolveErrorWrapping(LobbyExceptionReason reason, Exception exception = null) 
+        private void ResolveErrorWrapping(LobbyExceptionReason reason, Exception exception = null)
         {
             if (reason == LobbyExceptionReason.Unknown)
             {
                 Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int)reason}). Message: Something went wrong.");
                 throw new LobbyServiceException(reason, "Something went wrong.", exception);
             }
-            else 
+            else
             {
                 if (TryMapCommonErrorCodeToLobbyExceptionReason((int)reason, out var mappedReason))
                 {
@@ -397,7 +431,7 @@ namespace Unity.Services.Lobbies.Internal
                     Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int) reason}). Message: {apiException.ActualError.Detail}");
                     throw new LobbyServiceException(reason, apiException.ActualError.Detail, apiException);
                 }
-                else 
+                else
                 {
                     //Other general exception message handling
                     Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int)reason}). Message: {exception.Message}");
@@ -408,8 +442,10 @@ namespace Unity.Services.Lobbies.Internal
 
         private bool TryMapCommonErrorCodeToLobbyExceptionReason(int code, out LobbyExceptionReason reason)
         {
-            if (code < k_CommonErrorCodeRange) {
-                switch (code) {
+            if (code < k_CommonErrorCodeRange)
+            {
+                switch (code)
+                {
                     case CommonErrorCodes.Unknown: reason = LobbyExceptionReason.Unknown; break;
                     case CommonErrorCodes.ServiceUnavailable: reason = LobbyExceptionReason.ServiceUnavailable; break;
                     case CommonErrorCodes.TooManyRequests: reason = LobbyExceptionReason.RateLimited; break;
@@ -438,7 +474,7 @@ namespace Unity.Services.Lobbies.Internal
             if (!string.IsNullOrWhiteSpace(lobbyId))
             {
                 joinedLobbies = await GetJoinedLobbiesAsync();
-                if (joinedLobbies.Count != 1) 
+                if (joinedLobbies.Count != 1)
                 {
                     return null;
                 }
@@ -447,7 +483,7 @@ namespace Unity.Services.Lobbies.Internal
             }
 
             //If lobbyId is still null, we were unable to find a corresponding lobby through GetJoinedLobbiesAsync
-            if (lobbyId == null) 
+            if (lobbyId == null)
             {
                 return null;
             }
@@ -457,7 +493,7 @@ namespace Unity.Services.Lobbies.Internal
 
             //Check to see we have a valid lobby and a valid player object for amending data.
             //N.B. We do not validate anything beyond PlayerId in the Player object.
-            if (getLobbyResult == null || player?.Id == null) 
+            if (getLobbyResult == null || player?.Id == null)
             {
                 return getLobbyResult;
             }
@@ -470,7 +506,7 @@ namespace Unity.Services.Lobbies.Internal
             }
 
             //if player is part of the lobby and their details don't match (e.g. different relay alloc id), call update player to update details
-            if (IsPlayerDataEqual(player, playerObjectInLobby)) 
+            if (IsPlayerDataEqual(player, playerObjectInLobby))
             {
                 return getLobbyResult;
             }
@@ -488,7 +524,7 @@ namespace Unity.Services.Lobbies.Internal
 
         // Helper method for determining if a Player object is equal to another.
         // N.B. Player is a generated class which makes overriding Object.Equals a sub-optimal approach.
-        private bool IsPlayerDataEqual(Player a, Player b) 
+        private bool IsPlayerDataEqual(Player a, Player b)
         {
             bool result = (a.Id == b.Id);
             result &= (a.ConnectionInfo == b.ConnectionInfo);
@@ -498,17 +534,17 @@ namespace Unity.Services.Lobbies.Internal
 
             var aKeys = a.Data.Keys;
             var bKeys = b.Data.Keys;
-            bool areDictKeysEqual = 
+            bool areDictKeysEqual =
                 aKeys.All(bKeys.Contains) && aKeys.Count == bKeys.Count;
             result &= areDictKeysEqual;
 
             //Early exit opeprtunity here before checking individual data
-            if (!result) 
+            if (!result)
             {
                 return false;
             }
 
-            foreach (string key in aKeys) 
+            foreach (string key in aKeys)
             {
                 var aPlayerDataObject = a.Data[key];
                 var bPlayerDataObject = b.Data[key];
@@ -518,6 +554,7 @@ namespace Unity.Services.Lobbies.Internal
 
             return result;
         }
+
         #endregion
     }
 }

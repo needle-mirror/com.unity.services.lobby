@@ -6,7 +6,7 @@ using Unity.Services.Lobbies.Models;
 namespace Unity.Services.Lobbies
 {
     /// <summary>
-    /// Service for Lobbies. 
+    /// Service for Lobbies.
     /// Provides user the ability to create, delete, update, and query Lobbies.
     /// Includes operations for interacting with given players in a Lobby context.
     /// </summary>
@@ -24,6 +24,20 @@ namespace Unity.Services.Lobbies
         /// <exception cref="System.InvalidOperationException"></exception>
         /// <exception cref="Unity.Services.Lobbies.LobbyServiceException"></exception>
         Task<Models.Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, CreateLobbyOptions options = default);
+
+        /// <summary>
+        /// Create or join a Lobby with a given name and ID and specified player limit.
+        /// Async operation.
+        /// </summary>
+        /// <param name="lobbyId">ID of the lobby to create/join</param>
+        /// <param name="lobbyName">Name of the lobby to create/join</param>
+        /// <param name="maxPlayers">Player limit</param>
+        /// <param name="options">Optional request parameters</param>
+        /// <returns>Lobby data for the lobby that was just created/joined</returns>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="Unity.Services.Lobbies.LobbyServiceException"></exception>
+        Task<Models.Lobby> CreateOrJoinLobbyAsync(string lobbyId, string lobbyName, int maxPlayers, CreateLobbyOptions options = default);
 
         /// <summary>
         /// A subscription to the given lobby is created and the given callbacks are associated with it.
@@ -160,6 +174,5 @@ namespace Unity.Services.Lobbies
     /// </summary>
     public interface ILobbyServiceSDK : ILobbyService
     {
-
     }
 }

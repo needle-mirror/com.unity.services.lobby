@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The body of an Update Player Data request.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "PlayerUpdateRequest")]
     public class PlayerUpdateRequest
@@ -43,21 +47,66 @@ namespace Unity.Services.Lobbies.Models
         /// </summary>
         [Preserve]
         [DataMember(Name = "connectionInfo", EmitDefaultValue = false)]
-        public string ConnectionInfo { get; }
+        public string ConnectionInfo{ get; }
+        
         /// <summary>
         /// Custom game-specific properties to add, update, or remove from the player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.
         /// </summary>
-        [Preserve]
-        [JsonConverter(typeof(JsonObjectConverter))]
+        [Preserve][JsonConverter(typeof(JsonObjectCollectionConverter))]
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public JsonObject Data { get; }
+        
         /// <summary>
         /// The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.
         /// </summary>
         [Preserve]
         [DataMember(Name = "allocationId", EmitDefaultValue = false)]
-        public string AllocationId { get; }
+        public string AllocationId{ get; }
+    
+        /// <summary>
+        /// Formats a PlayerUpdateRequest into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
 
+            if (ConnectionInfo != null)
+            {
+                serializedModel += "connectionInfo," + ConnectionInfo + ",";
+            }
+            if (Data != null)
+            {
+                serializedModel += "data," + Data.ToString() + ",";
+            }
+            if (AllocationId != null)
+            {
+                serializedModel += "allocationId," + AllocationId;
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a PlayerUpdateRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (ConnectionInfo != null)
+            {
+                var connectionInfoStringValue = ConnectionInfo.ToString();
+                dictionary.Add("connectionInfo", connectionInfoStringValue);
+            }
+            
+            if (AllocationId != null)
+            {
+                var allocationIdStringValue = AllocationId.ToString();
+                dictionary.Add("allocationId", allocationIdStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

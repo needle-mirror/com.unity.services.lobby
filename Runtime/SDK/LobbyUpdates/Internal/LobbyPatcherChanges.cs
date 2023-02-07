@@ -19,7 +19,13 @@ namespace Unity.Services.Lobbies
         public ChangedLobbyValue<List<LobbyPlayerJoined>> PlayerJoined { get; private set; }
         public ChangedLobbyValue<Dictionary<int, LobbyPlayerChanges>> PlayerData { get; private set; }
         public ChangedLobbyValue<string> HostId { get; private set; }
+        public ChangedLobbyValue<int> Version { get; private set; }
         public ChangedLobbyValue<DateTime> LastUpdated { get; private set; }
+
+        public LobbyPatcherChanges(int version)
+        {
+            Version = LobbyValue.Changed<int>(version);
+        }
 
         public void LobbyDeletedChange()
         {

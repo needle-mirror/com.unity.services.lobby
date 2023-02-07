@@ -15,6 +15,9 @@ using UnityEngine;
 
 namespace Unity.Services.Lobbies.Http
 {
+    /// <summary>
+    /// JsonHelpers class
+    /// </summary>
     internal static class JsonHelpers
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
@@ -34,7 +37,8 @@ namespace Unity.Services.Lobbies.Http
                     success = false;
                     args.ErrorContext.Handled = true;
                 },
-                MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
+                MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore,
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             };
             result = JsonConvert.DeserializeObject<T>(@this, settings);
             return success;

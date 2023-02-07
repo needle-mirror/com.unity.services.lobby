@@ -24,13 +24,33 @@ namespace Unity.Services.Lobbies.Apis.Lobby
     {
             /// <summary>
             /// Async Operation.
+            /// Bulk update.
+            /// </summary>
+            /// <param name="request">Request object for BulkUpdateLobby.</param>
+            /// <param name="operationConfiguration">Configuration for BulkUpdateLobby.</param>
+            /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
+            /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+            Task<Response<Models.Lobby>> BulkUpdateLobbyAsync(Unity.Services.Lobbies.Lobby.BulkUpdateLobbyRequest request, Configuration operationConfiguration = null);
+
+            /// <summary>
+            /// Async Operation.
             /// Create a lobby.
             /// </summary>
             /// <param name="request">Request object for CreateLobby.</param>
             /// <param name="operationConfiguration">Configuration for CreateLobby.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> CreateLobbyAsync(CreateLobbyRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> CreateLobbyAsync(Unity.Services.Lobbies.Lobby.CreateLobbyRequest request, Configuration operationConfiguration = null);
+
+            /// <summary>
+            /// Async Operation.
+            /// Create or join a lobby with lobby ID.
+            /// </summary>
+            /// <param name="request">Request object for CreateOrJoinLobby.</param>
+            /// <param name="operationConfiguration">Configuration for CreateOrJoinLobby.</param>
+            /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
+            /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+            Task<Response<Models.Lobby>> CreateOrJoinLobbyAsync(Unity.Services.Lobbies.Lobby.CreateOrJoinLobbyRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -40,7 +60,17 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for DeleteLobby.</param>
             /// <returns>Task for a Response object containing status code, headers.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response> DeleteLobbyAsync(DeleteLobbyRequest request, Configuration operationConfiguration = null);
+            Task<Response> DeleteLobbyAsync(Unity.Services.Lobbies.Lobby.DeleteLobbyRequest request, Configuration operationConfiguration = null);
+
+            /// <summary>
+            /// Async Operation.
+            /// Get a player/service&#39;s hosted lobbies.
+            /// </summary>
+            /// <param name="request">Request object for GetHostedLobbies.</param>
+            /// <param name="operationConfiguration">Configuration for GetHostedLobbies.</param>
+            /// <returns>Task for a Response object containing status code, headers, and List&lt;string&gt; object.</returns>
+            /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+            Task<Response<List<string>>> GetHostedLobbiesAsync(Unity.Services.Lobbies.Lobby.GetHostedLobbiesRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -50,7 +80,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for GetJoinedLobbies.</param>
             /// <returns>Task for a Response object containing status code, headers, and List&lt;string&gt; object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<List<string>>> GetJoinedLobbiesAsync(GetJoinedLobbiesRequest request, Configuration operationConfiguration = null);
+            Task<Response<List<string>>> GetJoinedLobbiesAsync(Unity.Services.Lobbies.Lobby.GetJoinedLobbiesRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -60,7 +90,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for GetLobby.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> GetLobbyAsync(GetLobbyRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> GetLobbyAsync(Unity.Services.Lobbies.Lobby.GetLobbyRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -70,7 +100,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for Heartbeat.</param>
             /// <returns>Task for a Response object containing status code, headers.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response> HeartbeatAsync(HeartbeatRequest request, Configuration operationConfiguration = null);
+            Task<Response> HeartbeatAsync(Unity.Services.Lobbies.Lobby.HeartbeatRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -80,7 +110,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for JoinLobbyByCode.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> JoinLobbyByCodeAsync(JoinLobbyByCodeRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> JoinLobbyByCodeAsync(Unity.Services.Lobbies.Lobby.JoinLobbyByCodeRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -90,7 +120,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for JoinLobbyById.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> JoinLobbyByIdAsync(JoinLobbyByIdRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> JoinLobbyByIdAsync(Unity.Services.Lobbies.Lobby.JoinLobbyByIdRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -100,7 +130,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for QueryLobbies.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.QueryResponse object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.QueryResponse>> QueryLobbiesAsync(QueryLobbiesRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.QueryResponse>> QueryLobbiesAsync(Unity.Services.Lobbies.Lobby.QueryLobbiesRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -110,7 +140,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for QuickJoinLobby.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> QuickJoinLobbyAsync(QuickJoinLobbyRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> QuickJoinLobbyAsync(Unity.Services.Lobbies.Lobby.QuickJoinLobbyRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -120,7 +150,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for Reconnect.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> ReconnectAsync(ReconnectRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> ReconnectAsync(Unity.Services.Lobbies.Lobby.ReconnectRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -130,7 +160,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for RemovePlayer.</param>
             /// <returns>Task for a Response object containing status code, headers.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response> RemovePlayerAsync(RemovePlayerRequest request, Configuration operationConfiguration = null);
+            Task<Response> RemovePlayerAsync(Unity.Services.Lobbies.Lobby.RemovePlayerRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -140,7 +170,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for RequestTokens.</param>
             /// <returns>Task for a Response object containing status code, headers, and Dictionary&lt;string, Models.TokenData&gt; object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Dictionary<string, Models.TokenData>>> RequestTokensAsync(RequestTokensRequest request, Configuration operationConfiguration = null);
+            Task<Response<Dictionary<string, Models.TokenData>>> RequestTokensAsync(Unity.Services.Lobbies.Lobby.RequestTokensRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -150,7 +180,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for UpdateLobby.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> UpdateLobbyAsync(UpdateLobbyRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> UpdateLobbyAsync(Unity.Services.Lobbies.Lobby.UpdateLobbyRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
@@ -160,7 +190,7 @@ namespace Unity.Services.Lobbies.Apis.Lobby
             /// <param name="operationConfiguration">Configuration for UpdatePlayer.</param>
             /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-            Task<Response<Models.Lobby>> UpdatePlayerAsync(UpdatePlayerRequest request, Configuration operationConfiguration = null);
+            Task<Response<Models.Lobby>> UpdatePlayerAsync(Unity.Services.Lobbies.Lobby.UpdatePlayerRequest request, Configuration operationConfiguration = null);
 
     }
 
@@ -183,14 +213,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
                 // global configuration to ensure we have the correct
                 // combination of headers and a base path (if it is set).
                 Configuration globalConfiguration = new Configuration("https://lobby.services.api.unity.com/v1", 10, 4, null);
-                if (LobbyServiceSdk.Instance != null)
-                {
-                    globalConfiguration = LobbyServiceSdk.Instance.Configuration;
-                }
                 return Configuration.MergeConfigurations(_configuration, globalConfiguration);
             }
+            set { _configuration = value; }
         }
-        
+
         /// <summary>
         /// LobbyApiClient Constructor.
         /// </summary>
@@ -211,17 +238,71 @@ namespace Unity.Services.Lobbies.Apis.Lobby
 
         /// <summary>
         /// Async Operation.
+        /// Bulk update.
+        /// </summary>
+        /// <param name="request">Request object for BulkUpdateLobby.</param>
+        /// <param name="operationConfiguration">Configuration for BulkUpdateLobby.</param>
+        /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
+        /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+        public async Task<Response<Models.Lobby>> BulkUpdateLobbyAsync(Unity.Services.Lobbies.Lobby.BulkUpdateLobbyRequest request,
+            Configuration operationConfiguration = null)
+        {
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
+
+            // Merge the operation/request level configuration with the client level configuration.
+            var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
+
+            var response = await HttpClient.MakeRequestAsync("POST",
+                request.ConstructUrl(finalConfiguration.BasePath),
+                request.ConstructBody(),
+                request.ConstructHeaders(_accessToken, finalConfiguration),
+                finalConfiguration.RequestTimeout ?? _baseTimeout);
+
+            var handledResponse = ResponseHandler.HandleAsyncResponse<Models.Lobby>(response, statusCodeToTypeMap);
+            return new Response<Models.Lobby>(response, handledResponse);
+        }
+
+
+        /// <summary>
+        /// Async Operation.
         /// Create a lobby.
         /// </summary>
         /// <param name="request">Request object for CreateLobby.</param>
         /// <param name="operationConfiguration">Configuration for CreateLobby.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> CreateLobbyAsync(CreateLobbyRequest request,
+        public async Task<Response<Models.Lobby>> CreateLobbyAsync(Unity.Services.Lobbies.Lobby.CreateLobbyRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"201", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
+            // Merge the operation/request level configuration with the client level configuration.
+            var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
+
+            var response = await HttpClient.MakeRequestAsync("POST",
+                request.ConstructUrl(finalConfiguration.BasePath),
+                request.ConstructBody(),
+                request.ConstructHeaders(_accessToken, finalConfiguration),
+                finalConfiguration.RequestTimeout ?? _baseTimeout);
+
+            var handledResponse = ResponseHandler.HandleAsyncResponse<Models.Lobby>(response, statusCodeToTypeMap);
+            return new Response<Models.Lobby>(response, handledResponse);
+        }
+
+
+        /// <summary>
+        /// Async Operation.
+        /// Create or join a lobby with lobby ID.
+        /// </summary>
+        /// <param name="request">Request object for CreateOrJoinLobby.</param>
+        /// <param name="operationConfiguration">Configuration for CreateOrJoinLobby.</param>
+        /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
+        /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+        public async Task<Response<Models.Lobby>> CreateOrJoinLobbyAsync(Unity.Services.Lobbies.Lobby.CreateOrJoinLobbyRequest request,
+            Configuration operationConfiguration = null)
+        {
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"201", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -244,11 +325,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for DeleteLobby.</param>
         /// <returns>Task for a Response object containing status code, headers.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response> DeleteLobbyAsync(DeleteLobbyRequest request,
+        public async Task<Response> DeleteLobbyAsync(Unity.Services.Lobbies.Lobby.DeleteLobbyRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"204",  null },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -265,17 +346,44 @@ namespace Unity.Services.Lobbies.Apis.Lobby
 
         /// <summary>
         /// Async Operation.
+        /// Get a player/service&#39;s hosted lobbies.
+        /// </summary>
+        /// <param name="request">Request object for GetHostedLobbies.</param>
+        /// <param name="operationConfiguration">Configuration for GetHostedLobbies.</param>
+        /// <returns>Task for a Response object containing status code, headers, and List&lt;string&gt; object.</returns>
+        /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+        public async Task<Response<List<string>>> GetHostedLobbiesAsync(Unity.Services.Lobbies.Lobby.GetHostedLobbiesRequest request,
+            Configuration operationConfiguration = null)
+        {
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(List<string>)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
+
+            // Merge the operation/request level configuration with the client level configuration.
+            var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
+
+            var response = await HttpClient.MakeRequestAsync("GET",
+                request.ConstructUrl(finalConfiguration.BasePath),
+                request.ConstructBody(),
+                request.ConstructHeaders(_accessToken, finalConfiguration),
+                finalConfiguration.RequestTimeout ?? _baseTimeout);
+
+            var handledResponse = ResponseHandler.HandleAsyncResponse<List<string>>(response, statusCodeToTypeMap);
+            return new Response<List<string>>(response, handledResponse);
+        }
+
+
+        /// <summary>
+        /// Async Operation.
         /// Get a player&#39;s joined lobbies.
         /// </summary>
         /// <param name="request">Request object for GetJoinedLobbies.</param>
         /// <param name="operationConfiguration">Configuration for GetJoinedLobbies.</param>
         /// <returns>Task for a Response object containing status code, headers, and List&lt;string&gt; object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<List<string>>> GetJoinedLobbiesAsync(GetJoinedLobbiesRequest request,
+        public async Task<Response<List<string>>> GetJoinedLobbiesAsync(Unity.Services.Lobbies.Lobby.GetJoinedLobbiesRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(List<string>)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -298,11 +406,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for GetLobby.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> GetLobbyAsync(GetLobbyRequest request,
+        public async Task<Response<Models.Lobby>> GetLobbyAsync(Unity.Services.Lobbies.Lobby.GetLobbyRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"304",  null },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -325,11 +433,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for Heartbeat.</param>
         /// <returns>Task for a Response object containing status code, headers.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response> HeartbeatAsync(HeartbeatRequest request,
+        public async Task<Response> HeartbeatAsync(Unity.Services.Lobbies.Lobby.HeartbeatRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"204",  null },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -352,11 +460,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for JoinLobbyByCode.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> JoinLobbyByCodeAsync(JoinLobbyByCodeRequest request,
+        public async Task<Response<Models.Lobby>> JoinLobbyByCodeAsync(Unity.Services.Lobbies.Lobby.JoinLobbyByCodeRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -379,11 +487,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for JoinLobbyById.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> JoinLobbyByIdAsync(JoinLobbyByIdRequest request,
+        public async Task<Response<Models.Lobby>> JoinLobbyByIdAsync(Unity.Services.Lobbies.Lobby.JoinLobbyByIdRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -406,11 +514,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for QueryLobbies.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.QueryResponse object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.QueryResponse>> QueryLobbiesAsync(QueryLobbiesRequest request,
+        public async Task<Response<Models.QueryResponse>> QueryLobbiesAsync(Unity.Services.Lobbies.Lobby.QueryLobbiesRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.QueryResponse)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -433,11 +541,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for QuickJoinLobby.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> QuickJoinLobbyAsync(QuickJoinLobbyRequest request,
+        public async Task<Response<Models.Lobby>> QuickJoinLobbyAsync(Unity.Services.Lobbies.Lobby.QuickJoinLobbyRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -460,11 +568,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for Reconnect.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> ReconnectAsync(ReconnectRequest request,
+        public async Task<Response<Models.Lobby>> ReconnectAsync(Unity.Services.Lobbies.Lobby.ReconnectRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"409", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -487,11 +595,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for RemovePlayer.</param>
         /// <returns>Task for a Response object containing status code, headers.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response> RemovePlayerAsync(RemovePlayerRequest request,
+        public async Task<Response> RemovePlayerAsync(Unity.Services.Lobbies.Lobby.RemovePlayerRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"204",  null },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -514,11 +622,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for RequestTokens.</param>
         /// <returns>Task for a Response object containing status code, headers, and Dictionary&lt;string, Models.TokenData&gt; object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Dictionary<string, Models.TokenData>>> RequestTokensAsync(RequestTokensRequest request,
+        public async Task<Response<Dictionary<string, Models.TokenData>>> RequestTokensAsync(Unity.Services.Lobbies.Lobby.RequestTokensRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Dictionary<string, Models.TokenData>)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -541,11 +649,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for UpdateLobby.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> UpdateLobbyAsync(UpdateLobbyRequest request,
+        public async Task<Response<Models.Lobby>> UpdateLobbyAsync(Unity.Services.Lobbies.Lobby.UpdateLobbyRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 
@@ -568,11 +676,11 @@ namespace Unity.Services.Lobbies.Apis.Lobby
         /// <param name="operationConfiguration">Configuration for UpdatePlayer.</param>
         /// <returns>Task for a Response object containing status code, headers, and Models.Lobby object.</returns>
         /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
-        public async Task<Response<Models.Lobby>> UpdatePlayerAsync(UpdatePlayerRequest request,
+        public async Task<Response<Models.Lobby>> UpdatePlayerAsync(Unity.Services.Lobbies.Lobby.UpdatePlayerRequest request,
             Configuration operationConfiguration = null)
         {
             var statusCodeToTypeMap = new Dictionary<string, System.Type>() { {"200", typeof(Models.Lobby)   },{"400", typeof(Models.ErrorStatus)   },{"403", typeof(Models.ErrorStatus)   },{"404", typeof(Models.ErrorStatus)   },{"429", typeof(Models.ErrorStatus)   },{"500", typeof(Models.ErrorStatus)   } };
-            
+
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
 

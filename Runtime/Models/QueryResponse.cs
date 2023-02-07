@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// A list of lobbies that matched the specified query.  Only the public top-level data and player data properties are returned.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "QueryResponse")]
     public class QueryResponse
@@ -37,18 +41,53 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// 
+        /// Parameter results of QueryResponse
         /// </summary>
         [Preserve]
         [DataMember(Name = "results", EmitDefaultValue = false)]
         public List<Lobby> Results{ get; }
+        
         /// <summary>
-        /// 
+        /// Parameter continuationToken of QueryResponse
         /// </summary>
         [Preserve]
         [DataMember(Name = "continuationToken", EmitDefaultValue = false)]
         public string ContinuationToken{ get; }
     
+        /// <summary>
+        /// Formats a QueryResponse into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (Results != null)
+            {
+                serializedModel += "results," + Results.ToString() + ",";
+            }
+            if (ContinuationToken != null)
+            {
+                serializedModel += "continuationToken," + ContinuationToken;
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a QueryResponse as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (ContinuationToken != null)
+            {
+                var continuationTokenStringValue = ContinuationToken.ToString();
+                dictionary.Add("continuationToken", continuationTokenStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

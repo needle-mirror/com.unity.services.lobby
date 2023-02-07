@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The body of a Create Lobby request.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "CreateRequest")]
     public class CreateRequest
@@ -29,7 +33,7 @@ namespace Unity.Services.Lobbies.Models
         /// </summary>
         /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from the name.</param>
         /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.</param>
-        /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+        /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
         /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
         /// <param name="player">player param</param>
         /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
@@ -50,30 +54,35 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "name", IsRequired = true, EmitDefaultValue = true)]
         public string Name{ get; }
+        
         /// <summary>
         /// The maximum number of players that can be members of the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "maxPlayers", IsRequired = true, EmitDefaultValue = true)]
         public int MaxPlayers{ get; }
+        
         /// <summary>
-        /// Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
+        /// Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool? IsPrivate{ get; }
+        
         /// <summary>
         /// Whether or not the lobby is locked.  If true, new players will not be able to join.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isLocked", EmitDefaultValue = true)]
         public bool? IsLocked{ get; }
+        
         /// <summary>
-        /// 
+        /// Parameter player of CreateRequest
         /// </summary>
         [Preserve]
         [DataMember(Name = "player", EmitDefaultValue = false)]
         public Player Player{ get; }
+        
         /// <summary>
         /// Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).
         /// </summary>
@@ -81,6 +90,68 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public Dictionary<string, DataObject> Data{ get; }
     
+        /// <summary>
+        /// Formats a CreateRequest into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (Name != null)
+            {
+                serializedModel += "name," + Name + ",";
+            }
+            serializedModel += "maxPlayers," + MaxPlayers.ToString() + ",";
+            if (IsPrivate != null)
+            {
+                serializedModel += "isPrivate," + IsPrivate.ToString() + ",";
+            }
+            if (IsLocked != null)
+            {
+                serializedModel += "isLocked," + IsLocked.ToString() + ",";
+            }
+            if (Player != null)
+            {
+                serializedModel += "player," + Player.ToString() + ",";
+            }
+            if (Data != null)
+            {
+                serializedModel += "data," + Data.ToString();
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a CreateRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (Name != null)
+            {
+                var nameStringValue = Name.ToString();
+                dictionary.Add("name", nameStringValue);
+            }
+            
+            var maxPlayersStringValue = MaxPlayers.ToString();
+            dictionary.Add("maxPlayers", maxPlayersStringValue);
+            
+            if (IsPrivate != null)
+            {
+                var isPrivateStringValue = IsPrivate.ToString();
+                dictionary.Add("isPrivate", isPrivateStringValue);
+            }
+            
+            if (IsLocked != null)
+            {
+                var isLockedStringValue = IsLocked.ToString();
+                dictionary.Add("isLocked", isLockedStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

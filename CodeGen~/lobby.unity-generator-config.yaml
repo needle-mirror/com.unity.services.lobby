@@ -1,0 +1,33 @@
+generatorName: csharp-unity
+outputDir: ./generated
+inputSpec: ./lobby-spec.yaml
+packageName: com.unity.services.lobby
+additionalProperties:
+  unityVersion: "2020.3"
+  packageVersion: "1.1.0-pre.2"
+  unityPackageNamespace: "Unity.Services.Lobbies"
+  unityServiceName: "Lobby"
+  generateMarkdownDocumentation: false
+  usePhpStyleQueryParams: false
+  unityPackageDescription: "Enable players to find, create, and join lobbies with Lobby. Add Lobby to your multiplayer game to empower players to create the gaming experiences they want. Features include Quick Join, Public Lobby, and Private Match to allow flexibility in how players want to game with each other."
+  useUnityAuthentication: true
+  publicAccess: [models, deserializable]
+x-recipeEngine:
+  moveGeneratorFiles: true
+  trackedDir: ./Packages/Public/com.unity.services.lobby
+  preProcessCommands:
+    - echo "Done executing pre process commands."
+  postProcessCommands:
+    - cp -r ./generated/com.unity.services.lobby/* ../
+    - rm -r ./generated
+    # mac version - sed -i '' 's/public interface/internal interface/g' ../Runtime/Http/IDeserializable.cs # reset IDeserializable to internal
+    # mac version - sed -i '' 's/{ get; }/{ get; set; }/g' ../Runtime/Models/Lobby.cs # add Lobby properties setters
+    # mac version - sed -i '' 's/{ get; }/{ get; set; }/g' ../Runtime/Models/Player.cs # add Player properties setters
+    # mac version - sed -i '' 's/{ get; }/{ get; set; }/g' ../Runtime/Models/PlayerDataObject.cs # add PlayerDataObject properties setters
+    - sed -i 's/public interface/internal interface/g' ../Runtime/Http/IDeserializable.cs # reset IDeserializable to internal
+    - sed -i 's/{ get; }/{ get; internal set; }/g' ../Runtime/Models/Lobby.cs # add Lobby properties setters
+    - sed -i 's/{ get; }/{ get; internal set; }/g' ../Runtime/Models/Player.cs # add Player properties setters
+    - sed -i 's/{ get; }/{ get; internal set; }/g' ../Runtime/Models/PlayerDataObject.cs # add PlayerDataObject properties setters
+    - rm ../Runtime/Models/LobbyIOneOf.cs # remove duplicate IOneOf class
+    - rm -f openapi-generator.log
+    - echo "Done executing post process commands."

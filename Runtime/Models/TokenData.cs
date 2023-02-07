@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The data associated with the token.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "TokenData")]
     public class TokenData
@@ -42,6 +46,7 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "tokenValue", EmitDefaultValue = false)]
         public string TokenValue{ get; }
+        
         /// <summary>
         /// The URI of the token, if applicable.
         /// </summary>
@@ -49,6 +54,46 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "uri", EmitDefaultValue = false)]
         public string Uri{ get; }
     
+        /// <summary>
+        /// Formats a TokenData into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (TokenValue != null)
+            {
+                serializedModel += "tokenValue," + TokenValue + ",";
+            }
+            if (Uri != null)
+            {
+                serializedModel += "uri," + Uri;
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a TokenData as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (TokenValue != null)
+            {
+                var tokenValueStringValue = TokenValue.ToString();
+                dictionary.Add("tokenValue", tokenValueStringValue);
+            }
+            
+            if (Uri != null)
+            {
+                var uriStringValue = Uri.ToString();
+                dictionary.Add("uri", uriStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

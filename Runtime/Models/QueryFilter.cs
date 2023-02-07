@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// A filter for an individual field that is applied to a query.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "QueryFilter")]
     public class QueryFilter
@@ -45,12 +49,14 @@ namespace Unity.Services.Lobbies.Models
         [JsonConverter(typeof(StringEnumConverter))]
         [DataMember(Name = "field", IsRequired = true, EmitDefaultValue = true)]
         public FieldOptions Field{ get; }
+        
         /// <summary>
         /// The value to compare to the field being filtered.  This value must be a string and it must be parsable as the same type as &#x60;field&#x60; (e.g. &#x60;integer&#x60; for MaxPlayers, &#x60;datetime&#x60; for Created, etc.).  The value for &#x60;datetime&#x60; fields (Created, LastUpdated) must be in RFC3339 format.  For example, in C# this can be achieved using the \&quot;o\&quot; format specifier: &#x60;return dateTime.ToString(\&quot;o\&quot;, DateTimeFormatInfo.InvariantInfo);&#x60;.  Refer to your language documentation for other methods to generate RFC3339-compatible datetime strings.
         /// </summary>
         [Preserve]
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public string Value{ get; }
+        
         /// <summary>
         /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).
         /// </summary>
@@ -59,7 +65,6 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "op", IsRequired = true, EmitDefaultValue = true)]
         public OpOptions Op{ get; }
     
-
         /// <summary>
         /// The name of the field to filter on.  For custom data fields, the name of the index must be used instead of the field name.
         /// </summary>
@@ -73,99 +78,82 @@ namespace Unity.Services.Lobbies.Models
             /// </summary>
             [EnumMember(Value = "MaxPlayers")]
             MaxPlayers = 1,
-
             /// <summary>
             /// Enum AvailableSlots for value: AvailableSlots
             /// </summary>
             [EnumMember(Value = "AvailableSlots")]
             AvailableSlots = 2,
-
             /// <summary>
             /// Enum Name for value: Name
             /// </summary>
             [EnumMember(Value = "Name")]
             Name = 3,
-
             /// <summary>
             /// Enum Created for value: Created
             /// </summary>
             [EnumMember(Value = "Created")]
             Created = 4,
-
             /// <summary>
             /// Enum LastUpdated for value: LastUpdated
             /// </summary>
             [EnumMember(Value = "LastUpdated")]
             LastUpdated = 5,
-
             /// <summary>
             /// Enum S1 for value: S1
             /// </summary>
             [EnumMember(Value = "S1")]
             S1 = 6,
-
             /// <summary>
             /// Enum S2 for value: S2
             /// </summary>
             [EnumMember(Value = "S2")]
             S2 = 7,
-
             /// <summary>
             /// Enum S3 for value: S3
             /// </summary>
             [EnumMember(Value = "S3")]
             S3 = 8,
-
             /// <summary>
             /// Enum S4 for value: S4
             /// </summary>
             [EnumMember(Value = "S4")]
             S4 = 9,
-
             /// <summary>
             /// Enum S5 for value: S5
             /// </summary>
             [EnumMember(Value = "S5")]
             S5 = 10,
-
             /// <summary>
             /// Enum N1 for value: N1
             /// </summary>
             [EnumMember(Value = "N1")]
             N1 = 11,
-
             /// <summary>
             /// Enum N2 for value: N2
             /// </summary>
             [EnumMember(Value = "N2")]
             N2 = 12,
-
             /// <summary>
             /// Enum N3 for value: N3
             /// </summary>
             [EnumMember(Value = "N3")]
             N3 = 13,
-
             /// <summary>
             /// Enum N4 for value: N4
             /// </summary>
             [EnumMember(Value = "N4")]
             N4 = 14,
-
             /// <summary>
             /// Enum N5 for value: N5
             /// </summary>
             [EnumMember(Value = "N5")]
             N5 = 15,
-
             /// <summary>
             /// Enum IsLocked for value: IsLocked
             /// </summary>
             [EnumMember(Value = "IsLocked")]
             IsLocked = 16
-
         }
-
 
         /// <summary>
         /// The operator used to compare the field to the filter value.  Supports &#x60;CONTAINS&#x60; (only on the &#x60;Name&#x60; field), &#x60;EQ&#x60; (Equal), &#x60;NE&#x60; (Not Equal), &#x60;LT&#x60; (Less Than), &#x60;LE&#x60; (Less Than or Equal), &#x60;GT&#x60; (Greater Than), and &#x60;GE&#x60; (Greater Than or Equal).
@@ -180,45 +168,76 @@ namespace Unity.Services.Lobbies.Models
             /// </summary>
             [EnumMember(Value = "CONTAINS")]
             CONTAINS = 1,
-
             /// <summary>
             /// Enum EQ for value: EQ
             /// </summary>
             [EnumMember(Value = "EQ")]
             EQ = 2,
-
             /// <summary>
             /// Enum NE for value: NE
             /// </summary>
             [EnumMember(Value = "NE")]
             NE = 3,
-
             /// <summary>
             /// Enum LT for value: LT
             /// </summary>
             [EnumMember(Value = "LT")]
             LT = 4,
-
             /// <summary>
             /// Enum LE for value: LE
             /// </summary>
             [EnumMember(Value = "LE")]
             LE = 5,
-
             /// <summary>
             /// Enum GT for value: GT
             /// </summary>
             [EnumMember(Value = "GT")]
             GT = 6,
-
             /// <summary>
             /// Enum GE for value: GE
             /// </summary>
             [EnumMember(Value = "GE")]
             GE = 7
-
         }
 
+        /// <summary>
+        /// Formats a QueryFilter into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            serializedModel += "field," + Field + ",";
+            if (Value != null)
+            {
+                serializedModel += "value," + Value + ",";
+            }
+            serializedModel += "op," + Op;
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a QueryFilter as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            var fieldStringValue = Field.ToString();
+            dictionary.Add("field", fieldStringValue);
+            
+            if (Value != null)
+            {
+                var valueStringValue = Value.ToString();
+                dictionary.Add("value", valueStringValue);
+            }
+            
+            var opStringValue = Op.ToString();
+            dictionary.Add("op", opStringValue);
+            
+            return dictionary;
+        }
     }
 }
-

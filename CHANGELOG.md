@@ -5,6 +5,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.3] - 2023-02-07
+
+* LobbyEvents now provides a Version for comparison.
+* Added CreateOrJoinLobby function to allow for a single call to create or join.
+* Added PlayerProfile field to Player class
+
 ## [1.1.0-pre.2] - 2023-01-26
 
 * Removed guards that were preventing Lobby Events APIs from being exposed completely.

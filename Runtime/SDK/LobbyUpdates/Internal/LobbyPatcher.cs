@@ -71,7 +71,8 @@ internal static class LobbyPatcher
         }
         if (changes.Data.Removed)
         {
-            if (lobbyToChange.Data != null) {
+            if (lobbyToChange.Data != null)
+            {
                 lobbyToChange.Data.Clear();
             }
         }
@@ -147,7 +148,8 @@ internal static class LobbyPatcher
                 }
                 if (dataChanged.ChangedData.Removed)
                 {
-                    if (playerToChange.Data != null) {
+                    if (playerToChange.Data != null)
+                    {
                         playerToChange.Data.Clear();
                     }
                 }
@@ -170,6 +172,10 @@ internal static class LobbyPatcher
                     }
                 }
             }
+        }
+        if (changes.Version.Changed)
+        {
+            lobbyToChange.Version = changes.Version.Value;
         }
         // The HostId is related to the players, so applying this after editing players is preferred.
         if (changes.HostId.Changed)
@@ -201,9 +207,9 @@ internal static class LobbyPatcher
         if (lobbyPatches.Patches == null || lobbyPatches.Patches.Count < 1)
         {
             Debug.LogWarning("Attempting to apply patches to lobby, but there were no patches to apply.");
-            return new LobbyPatcherChanges();
+            return new LobbyPatcherChanges(lobbyPatches.Version);
         }
-        var changes = new LobbyPatcherChanges();
+        var changes = new LobbyPatcherChanges(lobbyPatches.Version);
         foreach (var patchToApply in lobbyPatches.Patches)
         {
             ParseLobbyPatch(patchToApply, changes);
@@ -224,7 +230,6 @@ internal static class LobbyPatcher
 
     private static void ParseAddPatch(LobbyPatch patch, LobbyPatcherChanges changes)
     {
-
         if (patch.path.StartsWith("/data/"))
         {
             ParseLobbyDataAddOrReplacePatch(patch, changes);
@@ -237,15 +242,22 @@ internal static class LobbyPatcher
         {
             switch (patch.path)
             {
-
-                case "/name": { changes.NameChange((string)patch.value); break; }
-                case "/isPrivate": { changes.IsPrivateChange((bool)patch.value); break; }
-                case "/isLocked": { changes.IsLockedChange((bool)patch.value); break; }
-                case "/availableSlots": { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
-                case "/maxPlayers": { changes.MaxPlayersChange((int)(Int64)patch.value); break; }
-                case "/data": { ParseAddLobbyData((JObject)patch.value, changes); break; }
-                case "/hostId": { changes.HostChange((string)patch.value); break; }
-                case "/lastUpdated": { changes.LastUpdatedChange((DateTime)patch.value); break; }
+                case "/name":
+                { changes.NameChange((string)patch.value); break; }
+                case "/isPrivate":
+                { changes.IsPrivateChange((bool)patch.value); break; }
+                case "/isLocked":
+                { changes.IsLockedChange((bool)patch.value); break; }
+                case "/availableSlots":
+                { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
+                case "/maxPlayers":
+                { changes.MaxPlayersChange((int)(Int64)patch.value); break; }
+                case "/data":
+                { ParseAddLobbyData((JObject)patch.value, changes); break; }
+                case "/hostId":
+                { changes.HostChange((string)patch.value); break; }
+                case "/lastUpdated":
+                { changes.LastUpdatedChange((DateTime)patch.value); break; }
                 default: Debug.LogError($"Not implemented add patch with path[{patch.path}]"); break;
             }
         }
@@ -265,13 +277,20 @@ internal static class LobbyPatcher
         {
             switch (patch.path)
             {
-                case "/name": { changes.NameChange((string)patch.value); break; }
-                case "/isPrivate": { changes.IsPrivateChange((bool)patch.value); break; }
-                case "/isLocked": { changes.IsLockedChange((bool)patch.value); break; }
-                case "/availableSlots": { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
-                case "/maxPlayers": { changes.MaxPlayersChange((int)(Int64)patch.value); break; }
-                case "/hostId": { changes.HostChange((string)patch.value); break; }
-                case "/lastUpdated": { changes.LastUpdatedChange((DateTime)patch.value); break; }
+                case "/name":
+                { changes.NameChange((string)patch.value); break; }
+                case "/isPrivate":
+                { changes.IsPrivateChange((bool)patch.value); break; }
+                case "/isLocked":
+                { changes.IsLockedChange((bool)patch.value); break; }
+                case "/availableSlots":
+                { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
+                case "/maxPlayers":
+                { changes.MaxPlayersChange((int)(Int64)patch.value); break; }
+                case "/hostId":
+                { changes.HostChange((string)patch.value); break; }
+                case "/lastUpdated":
+                { changes.LastUpdatedChange((DateTime)patch.value); break; }
                 default: Debug.LogError($"Not implemented replace patch with path[{patch.path}]"); break;
             }
         }
@@ -291,14 +310,22 @@ internal static class LobbyPatcher
         {
             switch (patch.path)
             {
-                case "/name": { changes.NameChange(null); break; }
-                case "/isPrivate": { changes.IsPrivateChange(false); break; }
-                case "/isLocked": { changes.IsLockedChange(false); break; }
-                case "/availableSlots": { changes.AvailableSlotsChange(0); break; }
-                case "/maxPlayers": { changes.MaxPlayersChange(MaxPlayerCount); break; }
-                case "/data": { ParseLobbyDataRemovePatch(patch, changes); break;}
-                case "/hostId": { changes.HostChange(null); break; }
-                case "/": { changes.LobbyDeletedChange(); break; }
+                case "/name":
+                { changes.NameChange(null); break; }
+                case "/isPrivate":
+                { changes.IsPrivateChange(false); break; }
+                case "/isLocked":
+                { changes.IsLockedChange(false); break; }
+                case "/availableSlots":
+                { changes.AvailableSlotsChange(0); break; }
+                case "/maxPlayers":
+                { changes.MaxPlayersChange(MaxPlayerCount); break; }
+                case "/data":
+                { ParseLobbyDataRemovePatch(patch, changes); break;}
+                case "/hostId":
+                { changes.HostChange(null); break; }
+                case "/":
+                { changes.LobbyDeletedChange(); break; }
                 default: Debug.LogError($"Not implemented remove patch with path[{patch.path}]"); break;
             }
         }
@@ -378,8 +405,10 @@ internal static class LobbyPatcher
         {
             switch (path)
             {
-                case "/players": { ParseAddPlayer(patch, index, changes); break; }
-                case "/connectionInfo": { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
+                case "/players":
+                { ParseAddPlayer(patch, index, changes); break; }
+                case "/connectionInfo":
+                { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
                 default: Debug.LogError($"Not implemented add player patch with path[{path}] from player patch[{patch.path}]"); break;
             }
         }
@@ -396,8 +425,10 @@ internal static class LobbyPatcher
         {
             switch (path)
             {
-                case "/connectionInfo": { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
-                case "/lastUpdated": { changes.PlayerLastUpdatedChange(index, (DateTime)patch.value); break; }
+                case "/connectionInfo":
+                { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
+                case "/lastUpdated":
+                { changes.PlayerLastUpdatedChange(index, (DateTime)patch.value); break; }
                 default: Debug.LogError($"Not implemented replace player patch with path[{path}]"); break;
             }
         }
@@ -414,8 +445,10 @@ internal static class LobbyPatcher
         {
             switch (path)
             {
-                case "/players": { changes.PlayerLeftChange(index); break; }
-                case "/connectionInfo": { changes.PlayerConnectionInfoChange(index, null); break; }
+                case "/players":
+                { changes.PlayerLeftChange(index); break; }
+                case "/connectionInfo":
+                { changes.PlayerConnectionInfoChange(index, null); break; }
                 default: Debug.LogError($"Not implemented remove player patch with path[{path}]"); break;
             }
         }
@@ -432,7 +465,7 @@ internal static class LobbyPatcher
     {
         if (path == "/data")
         {
-            var data = (JObject) patch.value;
+            var data = (JObject)patch.value;
             foreach (var dataToAdd in data)
             {
                 changes.PlayerDataChange(index, dataToAdd.Key, dataToAdd.Value.ToObject<PlayerDataObject>());

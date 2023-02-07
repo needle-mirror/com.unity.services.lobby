@@ -8,14 +8,17 @@
 //-----------------------------------------------------------------------------
 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Scripting;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Scripting;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Lobbies.Scheduler;
 using Unity.Services.Authentication.Internal;
 
 namespace Unity.Services.Lobbies.Lobby
@@ -29,7 +32,7 @@ namespace Unity.Services.Lobbies.Lobby
 
         public static string SerializeToString<T>(T obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings{ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore});
         }
     }
 
@@ -94,11 +97,30 @@ namespace Unity.Services.Lobbies.Lobby
         }
 
         /// <summary>
+        /// Helper function to add a provided map of keys and values, representing a model, to the
+        /// provided query params.
+        /// </summary>
+        /// <param name="queryParams">A `List/<string/>` of the query parameters.</param>
+        /// <param name="modelVars">A `Dictionary` representing the vars of the model</param>
+        /// <returns>Returns a `List/<string/>`</returns>
+        [Preserve]
+        public List<string> AddParamsToQueryParams(List<string> queryParams, Dictionary<string, string> modelVars)
+        {
+            foreach(var key in modelVars.Keys)
+            {
+                string escapedValue = UnityWebRequest.EscapeURL(modelVars[key]);
+                queryParams.Add($"{UnityWebRequest.EscapeURL(key)}={escapedValue}");
+            }
+
+            return queryParams;
+        }
+
+        /// <summary>
         /// Helper function to add a provided key and value to the provided
         /// query params and to escape the values correctly if it is a URL.
         /// </summary>
         /// <param name="queryParams">A `List/<string/>` of the query parameters.</param>
-        /// <param name="key">The key to be added.</param>        
+        /// <param name="key">The key to be added.</param>
         /// <typeparam name="T">The type of the value to be added.</typeparam>
         /// <param name="value">The value to be added.</param>
         /// <returns>Returns a `List/<string/>`</returns>
@@ -220,17 +242,24 @@ namespace Unity.Services.Lobbies.Lobby
         /// Generate multipart form file section.
         /// </summary>
         /// <param name="paramName">The parameter name.</param>
+        /// <param name="stream">The file stream to use.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns>Returns a multipart form section.</returns>
+        public IMultipartFormSection GenerateMultipartFormFileSection(string paramName, System.IO.FileStream stream, string contentType)
+        {
+            return new MultipartFormFileSection(paramName, ConstructBody(stream), GetFileName(stream.Name), contentType);
+        }
+
+        /// <summary>
+        /// Generate multipart form file section.
+        /// </summary>
+        /// <param name="paramName">The parameter name.</param>
         /// <param name="stream">The IO stream to use.</param>
         /// <param name="contentType">The content type.</param>
         /// <returns>Returns a multipart form section.</returns>
         public IMultipartFormSection GenerateMultipartFormFileSection(string paramName, System.IO.Stream stream, string contentType)
         {
-            if (stream is System.IO.FileStream)
-            {
-                System.IO.FileStream fileStream = (System.IO.FileStream) stream;
-                return new MultipartFormFileSection(paramName, ConstructBody(fileStream), GetFileName(fileStream.Name), contentType);
-            }
-            return new MultipartFormDataSection(paramName, ConstructBody(stream));
+            return new MultipartFormFileSection(paramName, ConstructBody(stream), Guid.NewGuid().ToString(), contentType);
         }
 
         private string GetFileName(string filePath)
@@ -240,37 +269,171 @@ namespace Unity.Services.Lobbies.Lobby
     }
 
     /// <summary>
+    /// BulkUpdateLobbyRequest
+    /// Bulk update
+    /// </summary>
+    [Preserve]
+    internal class BulkUpdateLobbyRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for lobbyId </summary>
+        [Preserve]
+        public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
+        /// <summary>Accessor for bulkUpdateRequest </summary>
+        [Preserve]
+        public Unity.Services.Lobbies.Models.BulkUpdateRequest BulkUpdateRequest { get; }
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// BulkUpdateLobby Request Object.
+        /// Bulk update
+        /// </summary>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
+        /// <param name="bulkUpdateRequest">BulkUpdateRequest param</param>
+        [Preserve]
+        public BulkUpdateLobbyRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.BulkUpdateRequest bulkUpdateRequest = default(Unity.Services.Lobbies.Models.BulkUpdateRequest))
+        {
+            LobbyId = lobbyId;
+
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            BulkUpdateRequest = bulkUpdateRequest;
+            PathAndQueryParams = $"/{lobbyId}/bulkupdate";
+
+
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            if(BulkUpdateRequest != null)
+            {
+                return ConstructBody(BulkUpdateRequest);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
+            string[] contentTypes = {
+                "application/json"
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var httpMethod = "POST";
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
+
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
     /// CreateLobbyRequest
     /// Create a lobby
     /// </summary>
     [Preserve]
     internal class CreateLobbyRequest : LobbyApiBaseRequest
     {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for createRequest </summary>
         [Preserve]
-        public CreateRequest CreateRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.CreateRequest CreateRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// CreateLobby Request Object.
         /// Create a lobby
         /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="createRequest">CreateRequest param</param>
         [Preserve]
-        public CreateLobbyRequest(CreateRequest createRequest = default(CreateRequest))
+        public CreateLobbyRequest(string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.CreateRequest createRequest = default(Unity.Services.Lobbies.Models.CreateRequest))
         {
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             CreateRequest = createRequest;
-            
-
             PathAndQueryParams = $"/create";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -312,6 +475,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -326,12 +493,157 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
+    /// CreateOrJoinLobbyRequest
+    /// Create or join a lobby with lobby ID
+    /// </summary>
+    [Preserve]
+    internal class CreateOrJoinLobbyRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for lobbyId </summary>
+        [Preserve]
+        public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
+        /// <summary>Accessor for createRequest </summary>
+        [Preserve]
+        public Unity.Services.Lobbies.Models.CreateRequest CreateRequest { get; }
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// CreateOrJoinLobby Request Object.
+        /// Create or join a lobby with lobby ID
+        /// </summary>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
+        /// <param name="createRequest">CreateRequest param</param>
+        [Preserve]
+        public CreateOrJoinLobbyRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.CreateRequest createRequest = default(Unity.Services.Lobbies.Models.CreateRequest))
+        {
+            LobbyId = lobbyId;
+
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            CreateRequest = createRequest;
+            PathAndQueryParams = $"/{lobbyId}/createorjoin";
+
+
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            if(CreateRequest != null)
+            {
+                return ConstructBody(CreateRequest);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
+            string[] contentTypes = {
+                "application/json"
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var httpMethod = "POST";
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
+
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -355,30 +667,32 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// DeleteLobby Request Object.
         /// Delete a lobby
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         [Preserve]
-        public DeleteLobbyRequest(string lobbyId)
+        public DeleteLobbyRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string))
         {
-            
             LobbyId = lobbyId;
 
-
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             PathAndQueryParams = $"/{lobbyId}";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -416,6 +730,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
             };
 
@@ -428,12 +746,141 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "DELETE";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    /// <summary>
+    /// GetHostedLobbiesRequest
+    /// Get a player/service&#39;s hosted lobbies
+    /// </summary>
+    [Preserve]
+    internal class GetHostedLobbiesRequest : LobbyApiBaseRequest
+    {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// GetHostedLobbies Request Object.
+        /// Get a player/service&#39;s hosted lobbies
+        /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
+        [Preserve]
+        public GetHostedLobbiesRequest(string serviceId = default(string), string impersonatedUserId = default(string))
+        {
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            PathAndQueryParams = $"/hosted";
+
+
+        }
+
+        /// <summary>
+        /// Helper function for constructing URL from request base path and
+        /// query params.
+        /// </summary>
+        /// <param name="requestBasePath"></param>
+        /// <returns></returns>
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        /// <summary>
+        /// Helper for constructing the request body.
+        /// </summary>
+        /// <returns>A list of IMultipartFormSection representing the request body.</returns>
+        public byte[] ConstructBody()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Helper function for constructing the headers.
+        /// </summary>
+        /// <param name="accessToken">The auth access token to use.</param>
+        /// <param name="operationConfiguration">The operation configuration to use.</param>
+        /// <returns>A dictionary representing the request headers.</returns>
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
+            string[] contentTypes = {
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var httpMethod = "GET";
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
+
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -455,25 +902,28 @@ namespace Unity.Services.Lobbies.Lobby
     [Preserve]
     internal class GetJoinedLobbiesRequest : LobbyApiBaseRequest
     {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// GetJoinedLobbies Request Object.
         /// Get a player&#39;s joined lobbies
         /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         [Preserve]
-        public GetJoinedLobbiesRequest()
+        public GetJoinedLobbiesRequest(string serviceId = default(string), string impersonatedUserId = default(string))
         {
-
-
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             PathAndQueryParams = $"/joined";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -511,6 +961,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
             };
 
@@ -524,12 +978,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "GET";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -553,30 +1020,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
+        /// <summary>Accessor for ifNoneMatch </summary>
+        [Preserve]
+        public string IfNoneMatch { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// GetLobby Request Object.
         /// Get lobby details
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
+        /// <param name="ifNoneMatch">The etag of the record being requested. Results/actions are only returned/executed when the current record version does not match the provided value.</param>
         [Preserve]
-        public GetLobbyRequest(string lobbyId)
+        public GetLobbyRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), string ifNoneMatch = default(string))
         {
-            
             LobbyId = lobbyId;
 
-
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            IfNoneMatch = ifNoneMatch;
             PathAndQueryParams = $"/{lobbyId}";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -614,6 +1088,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
             };
 
@@ -627,12 +1105,29 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "GET";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
+            if(!string.IsNullOrEmpty(IfNoneMatch))
+            {
+                headers.Add("If-none-match", IfNoneMatch);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -656,36 +1151,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for body </summary>
         [Preserve]
         public object Body { get; }
-        
         string PathAndQueryParams;
 
         /// <summary>
         /// Heartbeat Request Object.
         /// Heartbeat a lobby
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="body">body param</param>
         [Preserve]
-        public HeartbeatRequest(string lobbyId, object body = default(object))
+        public HeartbeatRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), object body = default(object))
         {
-            
             LobbyId = lobbyId;
-            Body = body;
-            
 
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            Body = body;
             PathAndQueryParams = $"/{lobbyId}/heartbeat";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -727,6 +1223,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -740,12 +1240,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -767,31 +1280,33 @@ namespace Unity.Services.Lobbies.Lobby
     [Preserve]
     internal class JoinLobbyByCodeRequest : LobbyApiBaseRequest
     {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for joinByCodeRequest </summary>
         [Preserve]
-        public JoinByCodeRequest JoinByCodeRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.JoinByCodeRequest JoinByCodeRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// JoinLobbyByCode Request Object.
         /// Join a lobby with lobby code
         /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="joinByCodeRequest">JoinByCodeRequest param</param>
         [Preserve]
-        public JoinLobbyByCodeRequest(JoinByCodeRequest joinByCodeRequest = default(JoinByCodeRequest))
+        public JoinLobbyByCodeRequest(string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.JoinByCodeRequest joinByCodeRequest = default(Unity.Services.Lobbies.Models.JoinByCodeRequest))
         {
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             JoinByCodeRequest = joinByCodeRequest;
-            
-
             PathAndQueryParams = $"/joinbycode";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -833,6 +1348,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -847,12 +1366,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -876,36 +1408,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for player </summary>
         [Preserve]
-        public Player Player { get; }
-        
+        public Unity.Services.Lobbies.Models.Player Player { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// JoinLobbyById Request Object.
         /// Join a lobby with lobby ID
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="player">Player param</param>
         [Preserve]
-        public JoinLobbyByIdRequest(string lobbyId, Player player = default(Player))
+        public JoinLobbyByIdRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.Player player = default(Unity.Services.Lobbies.Models.Player))
         {
-            
             LobbyId = lobbyId;
-            Player = player;
-            
 
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            Player = player;
             PathAndQueryParams = $"/{lobbyId}/join";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -947,6 +1480,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -961,12 +1498,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -988,31 +1538,33 @@ namespace Unity.Services.Lobbies.Lobby
     [Preserve]
     internal class QueryLobbiesRequest : LobbyApiBaseRequest
     {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for queryRequest </summary>
         [Preserve]
-        public QueryRequest QueryRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.QueryRequest QueryRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// QueryLobbies Request Object.
         /// Query public lobbies
         /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="queryRequest">QueryRequest param</param>
         [Preserve]
-        public QueryLobbiesRequest(QueryRequest queryRequest = default(QueryRequest))
+        public QueryLobbiesRequest(string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.QueryRequest queryRequest = default(Unity.Services.Lobbies.Models.QueryRequest))
         {
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             QueryRequest = queryRequest;
-            
-
             PathAndQueryParams = $"/query";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1054,6 +1606,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1068,12 +1624,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1095,31 +1664,33 @@ namespace Unity.Services.Lobbies.Lobby
     [Preserve]
     internal class QuickJoinLobbyRequest : LobbyApiBaseRequest
     {
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for quickJoinRequest </summary>
         [Preserve]
-        public QuickJoinRequest QuickJoinRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.QuickJoinRequest QuickJoinRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// QuickJoinLobby Request Object.
         /// Query available lobbies and join a random one
         /// </summary>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="quickJoinRequest">QuickJoinRequest param</param>
         [Preserve]
-        public QuickJoinLobbyRequest(QuickJoinRequest quickJoinRequest = default(QuickJoinRequest))
+        public QuickJoinLobbyRequest(string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.QuickJoinRequest quickJoinRequest = default(Unity.Services.Lobbies.Models.QuickJoinRequest))
         {
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             QuickJoinRequest = quickJoinRequest;
-            
-
             PathAndQueryParams = $"/quickjoin";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1161,6 +1732,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1175,12 +1750,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1204,36 +1792,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for body </summary>
         [Preserve]
         public object Body { get; }
-        
         string PathAndQueryParams;
 
         /// <summary>
         /// Reconnect Request Object.
         /// Reconnect to a lobby after disconnecting
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="body">body param</param>
         [Preserve]
-        public ReconnectRequest(string lobbyId, object body = default(object))
+        public ReconnectRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), object body = default(object))
         {
-            
             LobbyId = lobbyId;
-            Body = body;
-            
 
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            Body = body;
             PathAndQueryParams = $"/{lobbyId}/reconnect";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1275,6 +1864,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1289,12 +1882,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1318,37 +1924,38 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
         /// <summary>Accessor for playerId </summary>
         [Preserve]
-        
         public string PlayerId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// RemovePlayer Request Object.
         /// Remove a player
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
         /// <param name="playerId">The ID of the player to execute the request against.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         [Preserve]
-        public RemovePlayerRequest(string lobbyId, string playerId)
+        public RemovePlayerRequest(string lobbyId, string playerId, string serviceId = default(string), string impersonatedUserId = default(string))
         {
-            
             LobbyId = lobbyId;
-            
+
             PlayerId = playerId;
 
-
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             PathAndQueryParams = $"/{lobbyId}/players/{playerId}";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1386,6 +1993,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
             };
 
@@ -1398,12 +2009,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "DELETE";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1427,36 +2051,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
         /// <summary>Accessor for tokenRequest </summary>
         [Preserve]
         public List<TokenRequest> TokenRequest { get; }
-        
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// RequestTokens Request Object.
         /// Authentication token request
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
         /// <param name="tokenRequest">TokenRequest param</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         [Preserve]
-        public RequestTokensRequest(string lobbyId, List<TokenRequest> tokenRequest)
+        public RequestTokensRequest(string lobbyId, List<TokenRequest> tokenRequest, string serviceId = default(string), string impersonatedUserId = default(string))
         {
-            
             LobbyId = lobbyId;
-            TokenRequest = tokenRequest;
-            
 
+            TokenRequest = tokenRequest;
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
             PathAndQueryParams = $"/{lobbyId}/tokens";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1494,6 +2119,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1508,12 +2137,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1537,36 +2179,37 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for updateRequest </summary>
         [Preserve]
-        public UpdateRequest UpdateRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.UpdateRequest UpdateRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// UpdateLobby Request Object.
         /// Update lobby data
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="updateRequest">UpdateRequest param</param>
         [Preserve]
-        public UpdateLobbyRequest(string lobbyId, UpdateRequest updateRequest = default(UpdateRequest))
+        public UpdateLobbyRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.UpdateRequest updateRequest = default(Unity.Services.Lobbies.Models.UpdateRequest))
         {
-            
             LobbyId = lobbyId;
-            UpdateRequest = updateRequest;
-            
 
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            UpdateRequest = updateRequest;
             PathAndQueryParams = $"/{lobbyId}";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1608,6 +2251,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1622,12 +2269,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.
@@ -1651,43 +2311,43 @@ namespace Unity.Services.Lobbies.Lobby
     {
         /// <summary>Accessor for lobbyId </summary>
         [Preserve]
-        
         public string LobbyId { get; }
         /// <summary>Accessor for playerId </summary>
         [Preserve]
-        
         public string PlayerId { get; }
+        /// <summary>Accessor for serviceId </summary>
+        [Preserve]
+        public string ServiceId { get; }
+        /// <summary>Accessor for impersonatedUserId </summary>
+        [Preserve]
+        public string ImpersonatedUserId { get; }
         /// <summary>Accessor for playerUpdateRequest </summary>
         [Preserve]
-        public PlayerUpdateRequest PlayerUpdateRequest { get; }
-        
+        public Unity.Services.Lobbies.Models.PlayerUpdateRequest PlayerUpdateRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
         /// UpdatePlayer Request Object.
         /// Update player data
         /// </summary>
-        /// <param name="lobbyId">The ID of the lobby to execute the request against.</param>
+        /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
         /// <param name="playerId">The ID of the player to execute the request against.</param>
+        /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
+        /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
         /// <param name="playerUpdateRequest">PlayerUpdateRequest param</param>
         [Preserve]
-        public UpdatePlayerRequest(string lobbyId, string playerId, PlayerUpdateRequest playerUpdateRequest = default(PlayerUpdateRequest))
+        public UpdatePlayerRequest(string lobbyId, string playerId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.PlayerUpdateRequest playerUpdateRequest = default(Unity.Services.Lobbies.Models.PlayerUpdateRequest))
         {
-            
             LobbyId = lobbyId;
-            
-            PlayerId = playerId;
-            PlayerUpdateRequest = playerUpdateRequest;
-            
 
+            PlayerId = playerId;
+
+            ServiceId = serviceId;
+            ImpersonatedUserId = impersonatedUserId;
+            PlayerUpdateRequest = playerUpdateRequest;
             PathAndQueryParams = $"/{lobbyId}/players/{playerId}";
 
-            List<string> queryParams = new List<string>();
 
-            if (queryParams.Count > 0)
-            {
-                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
-            }
         }
 
         /// <summary>
@@ -1729,6 +2389,10 @@ namespace Unity.Services.Lobbies.Lobby
                 headers.Add("authorization", "Bearer " + accessToken.AccessToken);
             }
 
+            // Analytics headers
+            headers.Add("Unity-Client-Version", Application.unityVersion);
+            headers.Add("Unity-Client-Mode", Scheduler.EngineStateHelper.IsPlaying ? "play" : "edit");
+
             string[] contentTypes = {
                 "application/json"
             };
@@ -1743,12 +2407,25 @@ namespace Unity.Services.Lobbies.Lobby
             {
                 headers.Add("Accept", acceptHeader);
             }
+            var httpMethod = "POST";
             var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
             if (!string.IsNullOrEmpty(contentTypeHeader))
             {
                 headers.Add("Content-Type", contentTypeHeader);
             }
+            else if (httpMethod == "POST" || httpMethod == "PATCH")
+            {
+                headers.Add("Content-Type", "application/json");
+            }
 
+            if(!string.IsNullOrEmpty(ServiceId))
+            {
+                headers.Add("Service-id", ServiceId);
+            }
+            if(!string.IsNullOrEmpty(ImpersonatedUserId))
+            {
+                headers.Add("Impersonated-user-id", ImpersonatedUserId);
+            }
 
             // We also check if there are headers that are defined as part of
             // the request configuration.

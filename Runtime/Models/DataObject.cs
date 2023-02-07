@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// Custom data property for a lobby.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "DataObject")]
     public class DataObject
@@ -44,6 +48,7 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "value", EmitDefaultValue = false)]
         public string Value{ get; }
+        
         /// <summary>
         /// Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60;, the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.
         /// </summary>
@@ -51,6 +56,7 @@ namespace Unity.Services.Lobbies.Models
         [JsonConverter(typeof(StringEnumConverter))]
         [DataMember(Name = "visibility", IsRequired = true, EmitDefaultValue = true)]
         public VisibilityOptions Visibility{ get; }
+        
         /// <summary>
         /// The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  You will not be prevented from indexing multiple objects having properties with different names but the same index, but you will likely receive unexpected results from a query.
         /// </summary>
@@ -59,7 +65,6 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "index", EmitDefaultValue = false)]
         public IndexOptions Index{ get; }
     
-
         /// <summary>
         /// Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60;, the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.
         /// </summary>
@@ -73,21 +78,17 @@ namespace Unity.Services.Lobbies.Models
             /// </summary>
             [EnumMember(Value = "public")]
             Public = 1,
-
             /// <summary>
             /// Enum Member for value: member
             /// </summary>
             [EnumMember(Value = "member")]
             Member = 2,
-
             /// <summary>
             /// Enum Private for value: private
             /// </summary>
             [EnumMember(Value = "private")]
             Private = 3
-
         }
-
 
         /// <summary>
         /// The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  You will not be prevented from indexing multiple objects having properties with different names but the same index, but you will likely receive unexpected results from a query.
@@ -102,63 +103,93 @@ namespace Unity.Services.Lobbies.Models
             /// </summary>
             [EnumMember(Value = "S1")]
             S1 = 1,
-
             /// <summary>
             /// Enum S2 for value: S2
             /// </summary>
             [EnumMember(Value = "S2")]
             S2 = 2,
-
             /// <summary>
             /// Enum S3 for value: S3
             /// </summary>
             [EnumMember(Value = "S3")]
             S3 = 3,
-
             /// <summary>
             /// Enum S4 for value: S4
             /// </summary>
             [EnumMember(Value = "S4")]
             S4 = 4,
-
             /// <summary>
             /// Enum S5 for value: S5
             /// </summary>
             [EnumMember(Value = "S5")]
             S5 = 5,
-
             /// <summary>
             /// Enum N1 for value: N1
             /// </summary>
             [EnumMember(Value = "N1")]
             N1 = 6,
-
             /// <summary>
             /// Enum N2 for value: N2
             /// </summary>
             [EnumMember(Value = "N2")]
             N2 = 7,
-
             /// <summary>
             /// Enum N3 for value: N3
             /// </summary>
             [EnumMember(Value = "N3")]
             N3 = 8,
-
             /// <summary>
             /// Enum N4 for value: N4
             /// </summary>
             [EnumMember(Value = "N4")]
             N4 = 9,
-
             /// <summary>
             /// Enum N5 for value: N5
             /// </summary>
             [EnumMember(Value = "N5")]
             N5 = 10
-
         }
 
+        /// <summary>
+        /// Formats a DataObject into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (Value != null)
+            {
+                serializedModel += "value," + Value + ",";
+            }
+            serializedModel += "visibility," + Visibility + ",";
+            serializedModel += "index," + Index;
+            
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a DataObject as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (Value != null)
+            {
+                var valueStringValue = Value.ToString();
+                dictionary.Add("value", valueStringValue);
+            }
+            
+            var visibilityStringValue = Visibility.ToString();
+            dictionary.Add("visibility", visibilityStringValue);
+            
+            var indexStringValue = Index.ToString();
+            dictionary.Add("index", indexStringValue);
+            
+            
+            return dictionary;
+        }
     }
 }
-

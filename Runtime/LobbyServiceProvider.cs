@@ -39,7 +39,6 @@ namespace Unity.Services.Lobbies
             if (accessTokenLobby != null)
             {
                 LobbyServiceSdk.Instance = new InternalLobbyService(httpClient, registry.GetServiceComponent<IAccessToken>(), wire);
-
 #if UGS_LOBBY_VIVOX
                 var vivox = registry.GetServiceComponent<IVivox>();
                 if (vivox == null)

@@ -16,7 +16,7 @@ namespace Unity.Services.Lobbies
         bool LobbyDeleted { get; }
 
         /// <summary>
-        /// The change to the lobby’s name, if it has changed.
+        /// The change to the lobbyâ€™s name, if it has changed.
         /// </summary>
         ChangedLobbyValue<string> Name { get; }
 
@@ -41,7 +41,7 @@ namespace Unity.Services.Lobbies
         ChangedLobbyValue<int> MaxPlayers { get; }
 
         /// <summary>
-        /// The changes to the lobby’s data, if it has changed.
+        /// The changes to the lobbyâ€™s data, if it has changed.
         /// </summary>
         ChangedOrRemovedLobbyValue<Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>>> Data { get; }
 
@@ -56,14 +56,19 @@ namespace Unity.Services.Lobbies
         ChangedLobbyValue<List<LobbyPlayerJoined>> PlayerJoined { get; }
 
         /// <summary>
-        /// The changes to player’s data, if any have changed.
+        /// The changes to playerâ€™s data, if any have changed.
         /// </summary>
         ChangedLobbyValue<Dictionary<int, LobbyPlayerChanges>> PlayerData { get; }
 
         /// <summary>
-        /// The changes to the lobby’s host ID, if it has changed.
+        /// The changes to the lobbyâ€™s host ID, if it has changed.
         /// </summary>
         ChangedLobbyValue<string> HostId { get; }
+
+        /// <summary>
+        /// The changes to the lobbyâ€™s host ID, if it has changed.
+        /// </summary>
+        ChangedLobbyValue<int> Version { get; }
 
         /// <summary>
         /// The time the lobby changes occurred.

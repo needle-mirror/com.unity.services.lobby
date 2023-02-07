@@ -12,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.services.vivox",
+            "expression": "",
+            "define": "UGS_LOBBY_VIVOX"
+        }
+    ],
     "noEngineReferences": false
 }

@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The body of an Update Lobby request.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "UpdateRequest")]
     public class UpdateRequest
@@ -29,7 +33,7 @@ namespace Unity.Services.Lobbies.Models
         /// </summary>
         /// <param name="name">The name of the lobby that should be displayed to users.  All whitespace will be trimmed from the name.</param>
         /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.  Must be greater than or equal to the current number of players in the lobby.</param>
-        /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
+        /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
         /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
         /// <param name="data">Custom game-specific properties to add, update, or remove from the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.</param>
         /// <param name="hostId">The ID of the player to make the host of the lobby.  As soon as this is updated, the current host will no longer have permission to modify the lobby.</param>
@@ -50,31 +54,35 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name{ get; }
+        
         /// <summary>
         /// The maximum number of players that can be members of the lobby.  Must be greater than or equal to the current number of players in the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "maxPlayers", EmitDefaultValue = false)]
         public int? MaxPlayers{ get; }
+        
         /// <summary>
-        /// Whether or not the lobby is private.  Private lobbies do not appear in query results.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
+        /// Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool? IsPrivate{ get; }
+        
         /// <summary>
         /// Whether or not the lobby is locked.  If true, new players will not be able to join.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isLocked", EmitDefaultValue = true)]
         public bool? IsLocked{ get; }
+        
         /// <summary>
         /// Custom game-specific properties to add, update, or remove from the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.
         /// </summary>
-        [Preserve]
-        [JsonConverter(typeof(JsonObjectConverter))]
+        [Preserve][JsonConverter(typeof(JsonObjectCollectionConverter))]
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public JsonObject Data{ get; }
+        
         /// <summary>
         /// The ID of the player to make the host of the lobby.  As soon as this is updated, the current host will no longer have permission to modify the lobby.
         /// </summary>
@@ -82,6 +90,80 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "hostId", EmitDefaultValue = false)]
         public string HostId{ get; }
     
+        /// <summary>
+        /// Formats a UpdateRequest into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (Name != null)
+            {
+                serializedModel += "name," + Name + ",";
+            }
+            if (MaxPlayers != null)
+            {
+                serializedModel += "maxPlayers," + MaxPlayers.ToString() + ",";
+            }
+            if (IsPrivate != null)
+            {
+                serializedModel += "isPrivate," + IsPrivate.ToString() + ",";
+            }
+            if (IsLocked != null)
+            {
+                serializedModel += "isLocked," + IsLocked.ToString() + ",";
+            }
+            if (Data != null)
+            {
+                serializedModel += "data," + Data.ToString() + ",";
+            }
+            if (HostId != null)
+            {
+                serializedModel += "hostId," + HostId;
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a UpdateRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (Name != null)
+            {
+                var nameStringValue = Name.ToString();
+                dictionary.Add("name", nameStringValue);
+            }
+            
+            if (MaxPlayers != null)
+            {
+                var maxPlayersStringValue = MaxPlayers.ToString();
+                dictionary.Add("maxPlayers", maxPlayersStringValue);
+            }
+            
+            if (IsPrivate != null)
+            {
+                var isPrivateStringValue = IsPrivate.ToString();
+                dictionary.Add("isPrivate", isPrivateStringValue);
+            }
+            
+            if (IsLocked != null)
+            {
+                var isLockedStringValue = IsLocked.ToString();
+                dictionary.Add("isLocked", isLockedStringValue);
+            }
+            
+            if (HostId != null)
+            {
+                var hostIdStringValue = HostId.ToString();
+                dictionary.Add("hostId", hostIdStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

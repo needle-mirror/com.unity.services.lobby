@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The body of a Join Lobby request using lobby code.
+    /// </summary>
     [Preserve]
     [DataContract(Name = "JoinByCodeRequest")]
     public class JoinByCodeRequest
@@ -42,13 +46,48 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "lobbyCode", IsRequired = true, EmitDefaultValue = true)]
         public string LobbyCode{ get; }
+        
         /// <summary>
-        /// 
+        /// Parameter player of JoinByCodeRequest
         /// </summary>
         [Preserve]
         [DataMember(Name = "player", EmitDefaultValue = false)]
         public Player Player{ get; }
     
+        /// <summary>
+        /// Formats a JoinByCodeRequest into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (LobbyCode != null)
+            {
+                serializedModel += "lobbyCode," + LobbyCode + ",";
+            }
+            if (Player != null)
+            {
+                serializedModel += "player," + Player.ToString();
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a JoinByCodeRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (LobbyCode != null)
+            {
+                var lobbyCodeStringValue = LobbyCode.ToString();
+                dictionary.Add("lobbyCode", lobbyCodeStringValue);
+            }
+            
+            return dictionary;
+        }
     }
 }
-

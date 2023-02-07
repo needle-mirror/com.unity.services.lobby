@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.lobby",
   "displayName": "Lobby",
-  "version": "1.1.0-pre.2",
+  "version": "1.1.0-pre.3",
   "unity": "2020.3",
   "_upm": {
     "gameService": {
@@ -9,8 +9,7 @@
       "projectDashboardUrl": "https://dashboard.unity3d.com/organizations/{0}/projects/{1}/environments/default/lobby/overview",
       "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
       "useCasesUrl": "https://docs.unity.com/lobby/Content/unity-lobby-service-overview.htm"
-    },
-    "changelog": "* Removed guards that were preventing Lobby Events APIs from being exposed completely."
+    }
   },
   "description": "Enable players to find, create, and join lobbies with Lobby. Add Lobby to your multiplayer game to empower players to create the gaming experiences they want. Features include Quick Join, Public Lobby, and Private Match to allow flexibility in how players want to game with each other.",
   "dependencies": {
@@ -32,15 +31,14 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.services.lobby.tests": "1.1.0-pre.2"
+    "com.unity.services.lobby.tests": "1.1.0-pre.3"
   },
   "upmCi": {
-    "footprint": "4b892c57f5a3fe76a543a07b5b379b4cba87199a"
+    "footprint": "1dd8004cf1612555779fda72590d0f262a1474be"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.lobby@1.1/manual/index.html",
   "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.services.rooms.git",
+    "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "aaa71be0890df4c8119ebbb64834fa96cf69a18d"
+    "revision": "c56592b7e13344d732b5bd0a667c02ad2bb5e04c"
   }
 }

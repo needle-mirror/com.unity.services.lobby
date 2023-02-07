@@ -12,13 +12,13 @@ using Random = UnityEngine.Random;
 
 /// <summary>
 /// A simple "Hello World" style example using Lobby, exercising most of the Lobby APIs.
-/// 
+///
 /// SETUP:
 ///  1. Attach this script to a GameObject in scene
 ///  2. Sign in to your Unity developer account
 ///  3. Link your project to a Lobby-enabled cloud project
 ///  4. Enter play mode and observe the debug logs
-/// 
+///
 /// </summary>
 public class LobbyHelloWorld : MonoBehaviour
 {
@@ -357,6 +357,6 @@ public class LobbyHelloWorld : MonoBehaviour
         Debug.Log("Player signed in as " + AuthenticationService.Instance.PlayerId);
 
         // Player objects have Get-only properties, so you need to initialize the data bag here if you want to use it
-        return new Player(AuthenticationService.Instance.PlayerId, null, new Dictionary<string, PlayerDataObject>());
+        return new Player(AuthenticationService.Instance.PlayerId, null, data: new Dictionary<string, PlayerDataObject>());
     }
 }

@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -20,6 +21,9 @@ using Unity.Services.Lobbies.Http;
 
 namespace Unity.Services.Lobbies.Models
 {
+    /// <summary>
+    /// The body that will be returned for any failing request.  We are using the [RFC 7807 Error Format](https://www.rfc-editor.org/rfc/rfc7807.html#section-3.1).
+    /// </summary>
     [Preserve]
     [DataContract(Name = "ErrorStatus")]
     public class ErrorStatus
@@ -50,30 +54,35 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "type", EmitDefaultValue = false)]
         public string Type{ get; }
+        
         /// <summary>
         /// The HTTP status code of the response.
         /// </summary>
         [Preserve]
         [DataMember(Name = "status", EmitDefaultValue = false)]
         public int Status{ get; }
+        
         /// <summary>
         /// A short, human-readable summary of the problem type.  It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization.
         /// </summary>
         [Preserve]
         [DataMember(Name = "title", EmitDefaultValue = false)]
         public string Title{ get; }
+        
         /// <summary>
         /// A human-readable explanation specific to this occurrence of the problem.
         /// </summary>
         [Preserve]
         [DataMember(Name = "detail", EmitDefaultValue = false)]
         public string Detail{ get; }
+        
         /// <summary>
         /// An integer in the range 16000-16999 that uniquely identifies an error type.  This can be used to programatically identify the type of error.
         /// </summary>
         [Preserve]
         [DataMember(Name = "code", EmitDefaultValue = false)]
         public int Code{ get; }
+        
         /// <summary>
         /// A list of additional details about specific errors.
         /// </summary>
@@ -81,6 +90,68 @@ namespace Unity.Services.Lobbies.Models
         [DataMember(Name = "details", EmitDefaultValue = false)]
         public List<Detail> Details{ get; }
     
+        /// <summary>
+        /// Formats a ErrorStatus into a string of key-value pairs for use as a path parameter.
+        /// </summary>
+        /// <returns>Returns a string representation of the key-value pairs.</returns>
+        internal string SerializeAsPathParam()
+        {
+            var serializedModel = "";
+
+            if (Type != null)
+            {
+                serializedModel += "type," + Type + ",";
+            }
+            serializedModel += "status," + Status.ToString() + ",";
+            if (Title != null)
+            {
+                serializedModel += "title," + Title + ",";
+            }
+            if (Detail != null)
+            {
+                serializedModel += "detail," + Detail + ",";
+            }
+            serializedModel += "code," + Code.ToString() + ",";
+            if (Details != null)
+            {
+                serializedModel += "details," + Details.ToString();
+            }
+            return serializedModel;
+        }
+
+        /// <summary>
+        /// Returns a ErrorStatus as a dictionary of key-value pairs for use as a query parameter.
+        /// </summary>
+        /// <returns>Returns a dictionary of string key-value pairs.</returns>
+        internal Dictionary<string, string> GetAsQueryParam()
+        {
+            var dictionary = new Dictionary<string, string>();
+
+            if (Type != null)
+            {
+                var typeStringValue = Type.ToString();
+                dictionary.Add("type", typeStringValue);
+            }
+            
+            var statusStringValue = Status.ToString();
+            dictionary.Add("status", statusStringValue);
+            
+            if (Title != null)
+            {
+                var titleStringValue = Title.ToString();
+                dictionary.Add("title", titleStringValue);
+            }
+            
+            if (Detail != null)
+            {
+                var detailStringValue = Detail.ToString();
+                dictionary.Add("detail", detailStringValue);
+            }
+            
+            var codeStringValue = Code.ToString();
+            dictionary.Add("code", codeStringValue);
+            
+            return dictionary;
+        }
     }
 }
-

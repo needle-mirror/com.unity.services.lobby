@@ -13,8 +13,15 @@ namespace Unity.Services.Lobbies
 
         /// <summary>
         /// True if a change has occurred, false if there has been no change.
+        /// Changed value may or may not be an added value
         /// </summary>
         public bool Changed { get; }
+
+        /// <summary>
+        /// True if the value is new, false otherwise.
+        /// An Added value is necessarily a Changed value.
+        /// </summary>
+        public bool Added { get; internal set; }
 
         /// <summary>
         /// Creates a changed value.
@@ -24,6 +31,7 @@ namespace Unity.Services.Lobbies
         {
             Value = value;
             Changed = true;
+            Added = false;
         }
     }
 }

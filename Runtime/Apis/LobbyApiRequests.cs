@@ -1415,9 +1415,9 @@ namespace Unity.Services.Lobbies.Lobby
         /// <summary>Accessor for impersonatedUserId </summary>
         [Preserve]
         public string ImpersonatedUserId { get; }
-        /// <summary>Accessor for player </summary>
+        /// <summary>Accessor for joinByIdRequest </summary>
         [Preserve]
-        public Unity.Services.Lobbies.Models.Player Player { get; }
+        public Unity.Services.Lobbies.Models.JoinByIdRequest JoinByIdRequest { get; }
         string PathAndQueryParams;
 
         /// <summary>
@@ -1427,15 +1427,15 @@ namespace Unity.Services.Lobbies.Lobby
         /// <param name="lobbyId">The ID of the lobby to execute the request against. It should be composed of 64 characters or less, and only have dashes, underscores and alphanumeric characters.</param>
         /// <param name="serviceId">When service authentication is used, this provides a logical identity for the service</param>
         /// <param name="impersonatedUserId">When service authentication is used, this provides a 'playerId' to execute as. If this header is detected, the service request will be identical to a request from the specified player.</param>
-        /// <param name="player">Player param</param>
+        /// <param name="joinByIdRequest">JoinByIdRequest param</param>
         [Preserve]
-        public JoinLobbyByIdRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.Player player = default(Unity.Services.Lobbies.Models.Player))
+        public JoinLobbyByIdRequest(string lobbyId, string serviceId = default(string), string impersonatedUserId = default(string), Unity.Services.Lobbies.Models.JoinByIdRequest joinByIdRequest = default(Unity.Services.Lobbies.Models.JoinByIdRequest))
         {
             LobbyId = lobbyId;
 
             ServiceId = serviceId;
             ImpersonatedUserId = impersonatedUserId;
-            Player = player;
+            JoinByIdRequest = joinByIdRequest;
             PathAndQueryParams = $"/{lobbyId}/join";
 
 
@@ -1458,9 +1458,9 @@ namespace Unity.Services.Lobbies.Lobby
         /// <returns>A list of IMultipartFormSection representing the request body.</returns>
         public byte[] ConstructBody()
         {
-            if(Player != null)
+            if(JoinByIdRequest != null)
             {
-                return ConstructBody(Player);
+                return ConstructBody(JoinByIdRequest);
             }
             return null;
         }

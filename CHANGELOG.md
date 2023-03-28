@@ -5,6 +5,26 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.4] - 2023-03-28
+
+* Added more specific LobbyEvents
+  * `PlayerJoined`: Raised when a player joins the lobby
+  * `PlayerLeft`: Raised when a player leaves the lobby
+  * `KickedFromLobby`: Raised when the owned player is kicked from a lobby
+  * `PlayerDataChanged`: Raised when a player data changed
+  * `PlayerDataRemoved`: Raised when a player data is removed
+  * `PlayerDataAdded`: Raised when a player data is added
+  * `DataChanged`: Raised when a lobby data changed
+  * `DataRemoved`: Raised when a lobby data is removed
+  * `DataAdded`: Raised when a lobby data is added
+  * `LobbyDeleted`: Raised when a lobby is deleted
+* Added password-protected lobbies
+  * Added password to create lobby
+  * Added password to join by id/code
+  * Added password to update lobby (add, update, or remove password)
+  * Added HasPassword field to the lobby model (automatically managed based on existence of password)
+  * Added HasPassword as searchable field for queries
+
 ## [1.1.0-pre.3] - 2023-02-07
 
 * LobbyEvents now provides a Version for comparison.

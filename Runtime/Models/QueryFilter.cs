@@ -152,7 +152,12 @@ namespace Unity.Services.Lobbies.Models
             /// Enum IsLocked for value: IsLocked
             /// </summary>
             [EnumMember(Value = "IsLocked")]
-            IsLocked = 16
+            IsLocked = 16,
+            /// <summary>
+            /// Enum HasPassword for value: HasPassword
+            /// </summary>
+            [EnumMember(Value = "HasPassword")]
+            HasPassword = 17
         }
 
         /// <summary>

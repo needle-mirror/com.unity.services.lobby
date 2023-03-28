@@ -52,35 +52,35 @@ namespace Unity.Services.Lobbies.Models
         [Preserve][JsonConverter(typeof(JsonObjectConverter))]
         [DataMember(Name = "lobbyUpdate", EmitDefaultValue = false)]
         public UpdateRequest LobbyUpdate{ get; }
-        
+
         /// <summary>
         /// A mapping from player IDs to player update requests.
         /// </summary>
         [Preserve][JsonConverter(typeof(JsonObjectCollectionConverter))]
         [DataMember(Name = "playerUpdates", EmitDefaultValue = false)]
         public Dictionary<string, PlayerUpdateRequest> PlayerUpdates{ get; }
-        
+
         /// <summary>
         /// An array of players to add to the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "playersToAdd", EmitDefaultValue = false)]
         public List<Player> PlayersToAdd{ get; }
-        
+
         /// <summary>
         /// An array of player IDs to remove from the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "playersToRemove", EmitDefaultValue = false)]
         public List<string> PlayersToRemove{ get; }
-        
+
         /// <summary>
         /// Whether or not to silently ignore ineffectual updates (i.e. removing or updating players who are not in the lobby) instead of failing.
         /// </summary>
         [Preserve]
         [DataMember(Name = "ignoreIneffectualUpdates", EmitDefaultValue = true)]
         public bool? IgnoreIneffectualUpdates{ get; }
-    
+
         /// <summary>
         /// Formats a BulkUpdateRequest into a string of key-value pairs for use as a path parameter.
         /// </summary>
@@ -125,13 +125,13 @@ namespace Unity.Services.Lobbies.Models
                 var playersToRemoveStringValue = PlayersToRemove.ToString();
                 dictionary.Add("playersToRemove", playersToRemoveStringValue);
             }
-            
+
             if (IgnoreIneffectualUpdates != null)
             {
                 var ignoreIneffectualUpdatesStringValue = IgnoreIneffectualUpdates.ToString();
                 dictionary.Add("ignoreIneffectualUpdates", ignoreIneffectualUpdatesStringValue);
             }
-            
+
             return dictionary;
         }
     }

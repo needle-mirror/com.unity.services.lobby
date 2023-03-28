@@ -39,9 +39,10 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="joined">The time at which the player joined the lobby.</param>
         /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
         [Preserve]
-        public Player(string id = default, string connectionInfo = default, Dictionary<string, PlayerDataObject> data = default, string allocationId = default, DateTime joined = default, DateTime lastUpdated = default)
+        public Player(string id = default, string connectionInfo = default, Dictionary<string, PlayerDataObject> data = default, string allocationId = default, DateTime joined = default, DateTime lastUpdated = default, PlayerProfile profile = default)
         {
             Id = id;
+            Profile = profile;
             ConnectionInfo = connectionInfo;
             Data = data;
             AllocationId = allocationId;
@@ -55,49 +56,49 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public string Id{ get; internal set; }
-        
+
         /// <summary>
         /// Parameter profile of Player
         /// </summary>
         [Preserve]
         [DataMember(Name = "profile", EmitDefaultValue = false)]
         public PlayerProfile Profile{ get; set; }
-        
+
         /// <summary>
         /// Connection information for connecting to a relay with this player.
         /// </summary>
         [Preserve]
         [DataMember(Name = "connectionInfo", EmitDefaultValue = false)]
         public string ConnectionInfo{ get; internal set; }
-        
+
         /// <summary>
         /// Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).
         /// </summary>
         [Preserve]
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public Dictionary<string, PlayerDataObject> Data{ get; set; }
-        
+
         /// <summary>
         /// The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.
         /// </summary>
         [Preserve]
         [DataMember(Name = "allocationId", EmitDefaultValue = false)]
         public string AllocationId{ get; internal set; }
-        
+
         /// <summary>
         /// The time at which the player joined the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "joined", EmitDefaultValue = false)]
         public DateTime Joined{ get; set; }
-        
+
         /// <summary>
         /// The last time the metadata for this player was updated.
         /// </summary>
         [Preserve]
         [DataMember(Name = "lastUpdated", EmitDefaultValue = false)]
         public DateTime LastUpdated{ get; set; }
-    
+
         /// <summary>
         /// Formats a Player into a string of key-value pairs for use as a path parameter.
         /// </summary>
@@ -150,31 +151,31 @@ namespace Unity.Services.Lobbies.Models
                 var idStringValue = Id.ToString();
                 dictionary.Add("id", idStringValue);
             }
-            
+
             if (ConnectionInfo != null)
             {
                 var connectionInfoStringValue = ConnectionInfo.ToString();
                 dictionary.Add("connectionInfo", connectionInfoStringValue);
             }
-            
+
             if (AllocationId != null)
             {
                 var allocationIdStringValue = AllocationId.ToString();
                 dictionary.Add("allocationId", allocationIdStringValue);
             }
-            
+
             if (Joined != null)
             {
                 var joinedStringValue = Joined.ToString();
                 dictionary.Add("joined", joinedStringValue);
             }
-            
+
             if (LastUpdated != null)
             {
                 var lastUpdatedStringValue = LastUpdated.ToString();
                 dictionary.Add("lastUpdated", lastUpdatedStringValue);
             }
-            
+
             return dictionary;
         }
     }

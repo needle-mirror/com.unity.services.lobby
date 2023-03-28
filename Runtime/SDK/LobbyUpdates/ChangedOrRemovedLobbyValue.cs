@@ -18,7 +18,12 @@ namespace Unity.Services.Lobbies
         /// <summary>
         /// The value has been removed.
         /// </summary>
-        Removed = 2
+        Removed = 2,
+
+        /// <summary>
+        /// The value has been added.
+        /// </summary>
+        Added = 3
     }
 
     /// <summary>
@@ -39,18 +44,24 @@ namespace Unity.Services.Lobbies
 
         /// <summary>
         /// True if the value has been removed, false if it hasn't been removed.
-        /// Removed and Changed properties are mutually exclusive.
+        /// Removed properties are mutually exclusive with Changed and Added properties.
         /// </summary>
         public bool Removed { get => ChangeType == LobbyValueChangeType.Removed; }
 
         /// <summary>
         /// True if a change has occurred, false if there has been no change.
-        /// /// Removed and Changed properties are mutually exclusive.
+        /// Removed and Changed properties are mutually exclusive.
         /// </summary>
-        public bool Changed { get => ChangeType == LobbyValueChangeType.Changed; }
+        public bool Changed { get => ChangeType == LobbyValueChangeType.Changed || ChangeType == LobbyValueChangeType.Added; }
 
         /// <summary>
-        /// Whether this is a change or a removal.
+        /// True if the value was newly added, false otherwise.
+        /// Removed and Added properties are mutually exclusive.
+        /// </summary>
+        public bool Added { get => ChangeType == LobbyValueChangeType.Added; }
+
+        /// <summary>
+        /// Whether this is a change, a removal, or an addition.
         /// </summary>
         public LobbyValueChangeType ChangeType { get; }
 

@@ -70,7 +70,7 @@ namespace Unity.Services.Lobbies
         {
             get
             {
-                return (ILobbyServiceSDK) LobbyService.Instance;
+                return (ILobbyServiceSDK)LobbyService.Instance;
             }
         }
     }

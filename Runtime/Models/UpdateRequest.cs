@@ -35,15 +35,17 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="maxPlayers">The maximum number of players that can be members of the lobby.  Must be greater than or equal to the current number of players in the lobby.</param>
         /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
         /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
+        /// <param name="password">Updates the password for this lobby. If previously unspecified, HasPassword set to true. If becoming null, HasPassword will be set to false. All future joins will be rejected unless provided password matches.</param>
         /// <param name="data">Custom game-specific properties to add, update, or remove from the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.</param>
         /// <param name="hostId">The ID of the player to make the host of the lobby.  As soon as this is updated, the current host will no longer have permission to modify the lobby.</param>
         [Preserve]
-        public UpdateRequest(string name = default, int? maxPlayers = default, bool? isPrivate = default, bool? isLocked = default, Dictionary<string, DataObject> data = default, string hostId = default)
+        public UpdateRequest(string name = default, int? maxPlayers = default, bool? isPrivate = default, bool? isLocked = default, Dictionary<string, DataObject> data = default, string hostId = default, string password = default)
         {
             Name = name;
             MaxPlayers = maxPlayers;
             IsPrivate = isPrivate;
             IsLocked = isLocked;
+            Password = password;
             Data = new JsonObject(data);
             HostId = hostId;
         }
@@ -54,42 +56,49 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name{ get; }
-        
+
         /// <summary>
         /// The maximum number of players that can be members of the lobby.  Must be greater than or equal to the current number of players in the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "maxPlayers", EmitDefaultValue = false)]
         public int? MaxPlayers{ get; }
-        
+
         /// <summary>
         /// Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isPrivate", EmitDefaultValue = true)]
         public bool? IsPrivate{ get; }
-        
+
         /// <summary>
         /// Whether or not the lobby is locked.  If true, new players will not be able to join.
         /// </summary>
         [Preserve]
         [DataMember(Name = "isLocked", EmitDefaultValue = true)]
         public bool? IsLocked{ get; }
-        
+
+        /// <summary>
+        /// Updates the password for this lobby. If previously unspecified, HasPassword set to true. If becoming null, HasPassword will be set to false. All future joins will be rejected unless provided password matches.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "password", EmitDefaultValue = false)]
+        public string Password{ get; }
+
         /// <summary>
         /// Custom game-specific properties to add, update, or remove from the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.
         /// </summary>
         [Preserve][JsonConverter(typeof(JsonObjectCollectionConverter))]
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public JsonObject Data{ get; }
-        
+
         /// <summary>
         /// The ID of the player to make the host of the lobby.  As soon as this is updated, the current host will no longer have permission to modify the lobby.
         /// </summary>
         [Preserve]
         [DataMember(Name = "hostId", EmitDefaultValue = false)]
         public string HostId{ get; }
-    
+
         /// <summary>
         /// Formats a UpdateRequest into a string of key-value pairs for use as a path parameter.
         /// </summary>
@@ -113,6 +122,10 @@ namespace Unity.Services.Lobbies.Models
             if (IsLocked != null)
             {
                 serializedModel += "isLocked," + IsLocked.ToString() + ",";
+            }
+            if (Password != null)
+            {
+                serializedModel += "password," + Password + ",";
             }
             if (Data != null)
             {
@@ -138,31 +151,37 @@ namespace Unity.Services.Lobbies.Models
                 var nameStringValue = Name.ToString();
                 dictionary.Add("name", nameStringValue);
             }
-            
+
             if (MaxPlayers != null)
             {
                 var maxPlayersStringValue = MaxPlayers.ToString();
                 dictionary.Add("maxPlayers", maxPlayersStringValue);
             }
-            
+
             if (IsPrivate != null)
             {
                 var isPrivateStringValue = IsPrivate.ToString();
                 dictionary.Add("isPrivate", isPrivateStringValue);
             }
-            
+
             if (IsLocked != null)
             {
                 var isLockedStringValue = IsLocked.ToString();
                 dictionary.Add("isLocked", isLockedStringValue);
             }
-            
+
+            if (Password != null)
+            {
+                var passwordStringValue = Password.ToString();
+                dictionary.Add("password", passwordStringValue);
+            }
+
             if (HostId != null)
             {
                 var hostIdStringValue = HostId.ToString();
                 dictionary.Add("hostId", hostIdStringValue);
             }
-            
+
             return dictionary;
         }
     }

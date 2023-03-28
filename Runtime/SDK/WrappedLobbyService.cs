@@ -25,9 +25,14 @@ namespace Unity.Services.Lobbies.Internal
         //Minimum value of a lobby error (used to elevate standard errors if unhandled)
         internal const int LOBBY_ERROR_MIN_RANGE = 16000;
 
+        //Caches lobby data to be able to make diffs against Lobby versions.
+        //Refreshed with newer data when using GetLobby, CreateLobby and JoinLobby.
+        internal Dictionary<string, Models.Lobby> JoinedLobbyCache { get; }
+
         internal WrappedLobbyService(ILobbyServiceSdk lobbyService)
         {
             m_LobbyService = lobbyService;
+            JoinedLobbyCache = new Dictionary<string, Models.Lobby>();
         }
 
         /// <inheritdoc/>
@@ -42,16 +47,10 @@ namespace Unity.Services.Lobbies.Internal
                 throw new InvalidOperationException("Parameters 'maxPlayers' cannot be less than 1.");
             }
 
-            var createRequest = new CreateRequest(
-                name: lobbyName,
-                maxPlayers: maxPlayers,
-                isPrivate: options?.IsPrivate,
-                player:  options?.Player,
-                data: options?.Data
-            );
-
+            var createRequest = ConvertCreateOptionsToRequest(lobbyName, maxPlayers, options);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateLobbyAsync, new CreateLobbyRequest(createRequest : createRequest));
             var lobby = response.Result;
+            AddOrUpdateLobbyCache(lobby);
             return lobby;
         }
 
@@ -71,13 +70,8 @@ namespace Unity.Services.Lobbies.Internal
                 throw new InvalidOperationException("Parameters 'maxPlayers' cannot be less than 1.");
             }
 
-            var createRequest = new CreateRequest(
-                name: lobbyName,
-                maxPlayers: maxPlayers,
-                isPrivate: createOptions?.IsPrivate,
-                player:  createOptions?.Player,
-                data: createOptions?.Data
-            );
+
+            var createRequest = ConvertCreateOptionsToRequest(lobbyName, maxPlayers, createOptions);
             var createOrJoinRequest = new CreateOrJoinLobbyRequest(
                 lobbyId: lobbyId,
                 serviceId: null,
@@ -86,6 +80,7 @@ namespace Unity.Services.Lobbies.Internal
 
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateOrJoinLobbyAsync, createOrJoinRequest);
             var lobby = response.Result;
+            AddOrUpdateLobbyCache(lobby);
             return lobby;
         }
 
@@ -95,7 +90,8 @@ namespace Unity.Services.Lobbies.Internal
             if (m_LobbyService.Wire != null)
             {
                 var channel = m_LobbyService.Wire.CreateChannel(new LobbyWireTokenProvider(lobbyId, this));
-                var lobbyChannel = new LobbyChannel(channel, lobbyEventCallbacks);
+                var lobbyChannel = new LobbyChannel(channel, lobbyEventCallbacks, lobbyId, this);
+                GC.SuppressFinalize(lobbyChannel);
                 await lobbyChannel.SubscribeAsync();
                 return lobbyChannel;
             }
@@ -110,6 +106,8 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
             await TryCatchRequest(m_LobbyService.LobbyApi.DeleteLobbyAsync, new DeleteLobbyRequest(lobbyId));
+            if (JoinedLobbyCache.ContainsKey(lobbyId))
+                JoinedLobbyCache.Remove(lobbyId);
         }
 
         /// <inheritdoc/>
@@ -117,7 +115,8 @@ namespace Unity.Services.Lobbies.Internal
         {
             var request = new GetJoinedLobbiesRequest(null, null);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.GetJoinedLobbiesAsync, request);
-            return response.Result;
+            var lobbyIds = response.Result;
+            return lobbyIds;
         }
 
         /// <inheritdoc/>
@@ -129,6 +128,7 @@ namespace Unity.Services.Lobbies.Internal
             }
 
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.GetLobbyAsync, new GetLobbyRequest(lobbyId));
+            AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
 
@@ -143,7 +143,6 @@ namespace Unity.Services.Lobbies.Internal
             await TryCatchRequest(m_LobbyService.LobbyApi.HeartbeatAsync, new HeartbeatRequest(lobbyId));
         }
 
-        /// <inheritdoc/>
         public async Task<Models.Lobby> JoinLobbyByCodeAsync(string lobbyCode, JoinLobbyByCodeOptions options = default)
         {
             if (string.IsNullOrWhiteSpace(lobbyCode))
@@ -153,8 +152,10 @@ namespace Unity.Services.Lobbies.Internal
 
             try
             {
-                var joinRequest = new JoinLobbyByCodeRequest(joinByCodeRequest: new JoinByCodeRequest(lobbyCode, options?.Player));
+                // NOTE: constructor not passing value by name to ensure this breaks on any regeneration that changes the order of existing arguments
+                var joinRequest = new JoinLobbyByCodeRequest(joinByCodeRequest: new JoinByCodeRequest(lobbyCode, options?.Player, options?.Password));
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByCodeAsync, joinRequest);
+                AddOrUpdateLobbyCache(response.Result);
                 return response.Result;
             }
             catch (LobbyServiceException e)
@@ -165,6 +166,7 @@ namespace Unity.Services.Lobbies.Internal
                     var lobby = await LobbyConflictResolver(options?.Player, null, e);
                     if (lobby != null)
                     {
+                        AddOrUpdateLobbyCache(lobby);
                         return lobby;
                     }
                 }
@@ -182,7 +184,8 @@ namespace Unity.Services.Lobbies.Internal
 
             try
             {
-                var joinRequest = new JoinLobbyByIdRequest(lobbyId, player: options?.Player);
+                var joinByIdRequest = new JoinByIdRequest(options?.Password, options?.Player);
+                var joinRequest = new JoinLobbyByIdRequest(lobbyId, joinByIdRequest: joinByIdRequest);
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByIdAsync, joinRequest);
                 return response.Result;
             }
@@ -218,6 +221,7 @@ namespace Unity.Services.Lobbies.Internal
                 var quickJoinRequest = options == null ? null : new QuickJoinRequest(options.Filter, options.Player);
                 var quickJoinLobbyRequest = new QuickJoinLobbyRequest(quickJoinRequest: quickJoinRequest);
                 var response = await TryCatchRequest(m_LobbyService.LobbyApi.QuickJoinLobbyAsync, quickJoinLobbyRequest);
+                AddOrUpdateLobbyCache(response.Result);
                 return response.Result;
             }
             catch (LobbyServiceException e)
@@ -228,6 +232,7 @@ namespace Unity.Services.Lobbies.Internal
                     var lobby = await LobbyConflictResolver(options?.Player, null, e);
                     if (lobby != null)
                     {
+                        AddOrUpdateLobbyCache(lobby);
                         return lobby;
                     }
                 }
@@ -261,7 +266,8 @@ namespace Unity.Services.Lobbies.Internal
             {
                 throw new ArgumentNullException(nameof(options), "Update Lobby Options object must not be null.");
             }
-            var updateRequest = options == null ? null : new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId);
+
+            var updateRequest = new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId, options.Password);
             var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest: updateRequest);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.UpdateLobbyAsync, updateLobbyRequest);
             return response.Result;
@@ -297,6 +303,7 @@ namespace Unity.Services.Lobbies.Internal
             }
             var reconnectRequest = new ReconnectRequest(lobbyId);
             var response = await TryCatchRequest(m_LobbyService.LobbyApi.ReconnectAsync, reconnectRequest);
+            AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
 
@@ -553,6 +560,89 @@ namespace Unity.Services.Lobbies.Internal
             }
 
             return result;
+        }
+
+        private void AddOrUpdateLobbyCache(Models.Lobby newLobby)
+        {
+            JoinedLobbyCache[newLobby.Id] = CloneLobbyHelper(newLobby);
+        }
+
+        internal static Models.Lobby CloneLobbyHelper(Models.Lobby otherLobby)
+        {
+            var newLobby = new Models.Lobby();
+
+            newLobby.Version = otherLobby.Version;
+            newLobby.Id = otherLobby.Id;
+            newLobby.Name = otherLobby.Name;
+            newLobby.AvailableSlots = otherLobby.AvailableSlots;
+            newLobby.HasPassword = otherLobby.HasPassword;
+
+            if (otherLobby.Players != null)
+            {
+                newLobby.Players = new List<Player>();
+                foreach (var player in otherLobby.Players)
+                {
+                    var newPlayer = new Player()
+                    {
+                        Id = player.Id,
+                        AllocationId = player.AllocationId,
+                        Joined = player.Joined,
+                        ConnectionInfo = player.ConnectionInfo,
+                        LastUpdated = player.LastUpdated,
+                        Profile = player.Profile
+                    };
+
+                    if (player.Data != null)
+                    {
+                        newPlayer.Data = new Dictionary<string, PlayerDataObject>();
+                        foreach (var data in player.Data)
+                        {
+                            newPlayer.Data[data.Key] = new PlayerDataObject(data.Value.Visibility, data.Value.Value);
+                        }
+                    }
+
+                    newLobby.Players.Add(newPlayer);
+                }
+            }
+
+            if (otherLobby.Data != null)
+            {
+                newLobby.Data = new Dictionary<string, DataObject>();
+                foreach (var data in otherLobby.Data)
+                {
+                    newLobby.Data[data.Key] = new DataObject(data.Value.Visibility, data.Value.Value, data.Value.Index);
+                }
+            }
+
+            newLobby.Upid = otherLobby.Upid;
+            newLobby.EnvironmentId = otherLobby.EnvironmentId;
+            newLobby.HostId = otherLobby.HostId;
+            newLobby.IsLocked = otherLobby.IsLocked;
+            newLobby.IsPrivate = otherLobby.IsPrivate;
+            newLobby.LobbyCode = otherLobby.LobbyCode;
+            newLobby.MaxPlayers = otherLobby.MaxPlayers;
+            newLobby.Created = otherLobby.Created;
+            newLobby.LastUpdated = otherLobby.LastUpdated;
+
+            return newLobby;
+        }
+
+        public Dictionary<string, Models.Lobby> GetLobbyCache()
+        {
+            return JoinedLobbyCache;
+        }
+
+        private CreateRequest ConvertCreateOptionsToRequest(string lobbyName, int maxPlayers, CreateLobbyOptions options)
+        {
+            return new CreateRequest(
+                name: lobbyName,
+                maxPlayers: maxPlayers,
+                isPrivate: options?.IsPrivate,
+                isLocked: options?.IsLocked,
+                player:  options?.Player,
+                data: options?.Data,
+                password: options?.Password
+            );
         }
 
         #endregion

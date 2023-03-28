@@ -11,7 +11,7 @@ namespace Unity.Services.Lobbies
         /// The returned value could not be parsed, such as an error code was not included in the response.
         /// </summary>
         UnknownErrorCode = 0,
-        
+
         /// <summary>
         /// Validation check failed on Lobby e.g. in the case of a failed player id match.
         /// </summary>
@@ -29,20 +29,35 @@ namespace Unity.Services.Lobbies
 
         /// <summary>
         /// There was a resource conflict when attempting to access Lobby data.
-        /// Potentially caused by asynchonous contestion of resources. 
+        /// Potentially caused by asynchronous access to resources.
         /// </summary>
         LobbyConflict = 16003,
 
         /// <summary>
-        /// Target Lobby already has the maximum number of players. 
+        /// Target Lobby already has the maximum number of players.
         /// No additional members can be added.
         /// </summary>
         LobbyFull = 16004,
 
         /// <summary>
+        /// Target Lobby is locked.
+        /// No additional players can join.
+        /// </summary>
+        LobbyLocked = 16005,
+
+        /// <summary>
         /// No accessible lobbies are currently available for quick-join.
         /// </summary>
         NoOpenLobbies = 16006,
+
+        /// The Lobby cannot be created because it already exists.
+        /// </summary>
+        LobbyAlreadyExists = 16007,
+
+        /// <summary>
+        /// Player attempted to join with a password that did not match the lobby's password
+        /// </summary>
+        IncorrectPassword = 16009,
         #endregion
 
         #region Http Errors
@@ -51,25 +66,25 @@ namespace Unity.Services.Lobbies
         /// The request could not be understood by the server due to malformed syntax.
         /// </summary>
         InvalidArgument = 16400,
-        
+
         /// <summary>
         /// Error code representing HTTP Status Code of 400 for the Lobby Service.
         /// The request made was invalid and will not be processed by the service.
         /// </summary>
         BadRequest = 16400,
-        
+
         /// <summary>
         /// Error code representing HTTP Status Code of 401 for the Lobby Service.
         /// The request requires authentication.
         /// </summary>
         Unauthorized = 16401,
-        
+
         /// <summary>
         /// Error code representing HTTP Status Code of 402 for the Lobby Service.
         /// This error code is reserved for future use.
         /// </summary>
         PaymentRequired = 16402,
-        
+
         /// <summary>
         /// Error code representing HTTP Status Code of 403 for the Lobby Service.
         /// The server understood the request, and refuses to fulfill it.

@@ -12,6 +12,7 @@ namespace Unity.Services.Lobbies
         public ChangedLobbyValue<string> Name { get; private set; }
         public ChangedLobbyValue<bool> IsPrivate { get; private set; }
         public ChangedLobbyValue<bool> IsLocked { get; private set; }
+        public ChangedLobbyValue<bool> HasPassword { get;  private set; }
         public ChangedLobbyValue<int> AvailableSlots { get; private set; }
         public ChangedLobbyValue<int> MaxPlayers { get; private set; }
         public ChangedOrRemovedLobbyValue<Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>>> Data { get; private set; }
@@ -47,6 +48,11 @@ namespace Unity.Services.Lobbies
             IsLocked = LobbyValue.Changed<bool>(isLocked);
         }
 
+        public void HasPasswordChange(bool hasPassword)
+        {
+            HasPassword = LobbyValue.Changed<bool>(hasPassword);
+        }
+
         public void AvailableSlotsChange(int availableSlots)
         {
             AvailableSlots = LobbyValue.Changed<int>(availableSlots);
@@ -64,6 +70,15 @@ namespace Unity.Services.Lobbies
                 Data = LobbyValue.ChangedNotRemoved(new Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>>());
             }
             Data.Value[key] = LobbyValue.ChangedNotRemoved(dataObject);
+        }
+
+        public void DataAdded(string key, DataObject dataObject)
+        {
+            if (!Data.Added)
+            {
+                Data = LobbyValue.ChangeAdded(new Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>>());
+            }
+            Data.Value[key] = LobbyValue.ChangeAdded(dataObject);
         }
 
         public void DataRemoveChange()
@@ -103,7 +118,7 @@ namespace Unity.Services.Lobbies
         {
             if (!PlayerJoined.Changed)
             {
-                PlayerJoined = LobbyValue.Changed<List<LobbyPlayerJoined>>(new List<LobbyPlayerJoined>());
+                PlayerJoined = LobbyValue.Added<List<LobbyPlayerJoined>>(new List<LobbyPlayerJoined>());
             }
             PlayerJoined.Value.Add(new LobbyPlayerJoined(index, player));
         }
@@ -116,6 +131,16 @@ namespace Unity.Services.Lobbies
                 playerDataChanged.ChangedData = LobbyValue.ChangedNotRemoved(new Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>());
             }
             playerDataChanged.ChangedData.Value[key] = LobbyValue.ChangedNotRemoved(playerDataObject);
+        }
+
+        public void PlayerDataAdded(int index, string key, PlayerDataObject playerDataObject)
+        {
+            var playerDataChanged = PreparePlayerDataAddition(index);
+            if (!playerDataChanged.ChangedData.Added)
+            {
+                playerDataChanged.ChangedData = LobbyValue.ChangeAdded(new Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>());
+            }
+            playerDataChanged.ChangedData.Value[key] = LobbyValue.ChangeAdded(playerDataObject);
         }
 
         public void PlayerDataRemoveChange(int index)
@@ -159,6 +184,20 @@ namespace Unity.Services.Lobbies
             if (!PlayerData.Changed)
             {
                 PlayerData = LobbyValue.Changed(new Dictionary<int, LobbyPlayerChanges>());
+            }
+            if (!PlayerData.Value.TryGetValue(index, out var playerDataChanged))
+            {
+                playerDataChanged = new LobbyPlayerChanges(index);
+                PlayerData.Value[index] = playerDataChanged;
+            }
+            return playerDataChanged;
+        }
+
+        private LobbyPlayerChanges PreparePlayerDataAddition(int index)
+        {
+            if (!PlayerData.Changed)
+            {
+                PlayerData = LobbyValue.Added(new Dictionary<int, LobbyPlayerChanges>());
             }
             if (!PlayerData.Value.TryGetValue(index, out var playerDataChanged))
             {

@@ -6,7 +6,7 @@ namespace Unity.Services.Lobbies
     /// <summary>
     /// Parameters to update on a given UpdateLobby request.
     /// </summary>
-    public class UpdateLobbyOptions 
+    public class UpdateLobbyOptions
     {
         /// <summary>
         /// The name of the lobby that should be displayed to users. All whitespace will be trimmed from the name.
@@ -30,6 +30,11 @@ namespace Unity.Services.Lobbies
         /// Indicates whether or not the lobby is locked.
         /// </summary>
         public bool? IsLocked { get; set; }
+
+        /// <summary>
+        /// The new password for the target lobby. Updating to empty string "" will remove password protection from the lobby and set HasPassword to false.
+        /// </summary>
+        public string Password { get; set; }
 
         /// <summary>
         /// Custom game-specific properties to add, update, or remove from the lobby (e.g. mapName or gameType).

@@ -36,15 +36,17 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="isPrivate">Whether or not the lobby is private.  Private lobbies do not appear in query results and cannot be fetched by non-members using the GetLobby API.  If the lobby is not publicly visible, the creator can share the &#x60;lobbyCode&#x60; with other users who can use it to join this lobby.</param>
         /// <param name="isLocked">Whether or not the lobby is locked.  If true, new players will not be able to join.</param>
         /// <param name="player">player param</param>
+        /// <param name="password">The password for this lobby. If specified, the lobby will be created with HasPassword set to true. All joins will be rejected unless provided password matches.</param>
         /// <param name="data">Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).</param>
         [Preserve]
-        public CreateRequest(string name, int maxPlayers, bool? isPrivate = false, bool? isLocked = false, Player player = default, Dictionary<string, DataObject> data = default)
+        public CreateRequest(string name, int maxPlayers, bool? isPrivate = false, bool? isLocked = false, Player player = default, Dictionary<string, DataObject> data = default, string password = default)
         {
             Name = name;
             MaxPlayers = maxPlayers;
             IsPrivate = isPrivate;
             IsLocked = isLocked;
             Player = player;
+            Password = password;
             Data = data;
         }
 
@@ -84,6 +86,13 @@ namespace Unity.Services.Lobbies.Models
         public Player Player{ get; }
         
         /// <summary>
+        /// The password for this lobby. If specified, the lobby will be created with HasPassword set to true. All joins will be rejected unless provided password matches.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "password", EmitDefaultValue = false)]
+        public string Password{ get; }
+        
+        /// <summary>
         /// Custom game-specific properties that apply to the lobby (e.g. &#x60;mapName&#x60; or &#x60;gameType&#x60;).
         /// </summary>
         [Preserve]
@@ -114,6 +123,10 @@ namespace Unity.Services.Lobbies.Models
             if (Player != null)
             {
                 serializedModel += "player," + Player.ToString() + ",";
+            }
+            if (Password != null)
+            {
+                serializedModel += "password," + Password + ",";
             }
             if (Data != null)
             {
@@ -149,6 +162,12 @@ namespace Unity.Services.Lobbies.Models
             {
                 var isLockedStringValue = IsLocked.ToString();
                 dictionary.Add("isLocked", isLockedStringValue);
+            }
+            
+            if (Password != null)
+            {
+                var passwordStringValue = Password.ToString();
+                dictionary.Add("password", passwordStringValue);
             }
             
             return dictionary;

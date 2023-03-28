@@ -22,33 +22,24 @@ using Unity.Services.Lobbies.Http;
 namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
-    /// The body of a Join Lobby request using lobby code.
+    /// The body of a Join request
     /// </summary>
     [Preserve]
-    [DataContract(Name = "JoinByCodeRequest")]
-    public class JoinByCodeRequest
+    [DataContract(Name = "JoinByIdRequest")]
+    public class JoinByIdRequest
     {
         /// <summary>
-        /// The body of a Join Lobby request using lobby code.
+        /// The body of a Join request
         /// </summary>
-        /// <param name="lobbyCode">The lobby code of the lobby to join.  Mutually exclusive with &#x60;id&#x60;.  This is used to join a private lobby where the lobby code was shared to other users manually.</param>
         /// <param name="password">The password to the target lobby. If target lobby HasPassword is true, this password must match or the request is denied.</param>
         /// <param name="player">player param</param>
         [Preserve]
-        public JoinByCodeRequest(string lobbyCode, Player player = default, string password = default)
+        public JoinByIdRequest(string password = default, Player player = default)
         {
-            LobbyCode = lobbyCode;
             Password = password;
             Player = player;
         }
 
-        /// <summary>
-        /// The lobby code of the lobby to join.  Mutually exclusive with &#x60;id&#x60;.  This is used to join a private lobby where the lobby code was shared to other users manually.
-        /// </summary>
-        [Preserve]
-        [DataMember(Name = "lobbyCode", IsRequired = true, EmitDefaultValue = true)]
-        public string LobbyCode{ get; }
-        
         /// <summary>
         /// The password to the target lobby. If target lobby HasPassword is true, this password must match or the request is denied.
         /// </summary>
@@ -57,24 +48,20 @@ namespace Unity.Services.Lobbies.Models
         public string Password{ get; }
         
         /// <summary>
-        /// Parameter player of JoinByCodeRequest
+        /// Parameter player of JoinByIdRequest
         /// </summary>
         [Preserve]
         [DataMember(Name = "player", EmitDefaultValue = false)]
         public Player Player{ get; }
     
         /// <summary>
-        /// Formats a JoinByCodeRequest into a string of key-value pairs for use as a path parameter.
+        /// Formats a JoinByIdRequest into a string of key-value pairs for use as a path parameter.
         /// </summary>
         /// <returns>Returns a string representation of the key-value pairs.</returns>
         internal string SerializeAsPathParam()
         {
             var serializedModel = "";
 
-            if (LobbyCode != null)
-            {
-                serializedModel += "lobbyCode," + LobbyCode + ",";
-            }
             if (Password != null)
             {
                 serializedModel += "password," + Password + ",";
@@ -87,19 +74,13 @@ namespace Unity.Services.Lobbies.Models
         }
 
         /// <summary>
-        /// Returns a JoinByCodeRequest as a dictionary of key-value pairs for use as a query parameter.
+        /// Returns a JoinByIdRequest as a dictionary of key-value pairs for use as a query parameter.
         /// </summary>
         /// <returns>Returns a dictionary of string key-value pairs.</returns>
         internal Dictionary<string, string> GetAsQueryParam()
         {
             var dictionary = new Dictionary<string, string>();
 
-            if (LobbyCode != null)
-            {
-                var lobbyCodeStringValue = LobbyCode.ToString();
-                dictionary.Add("lobbyCode", lobbyCodeStringValue);
-            }
-            
             if (Password != null)
             {
                 var passwordStringValue = Password.ToString();

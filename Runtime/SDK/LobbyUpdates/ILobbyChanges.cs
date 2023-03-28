@@ -31,7 +31,11 @@ namespace Unity.Services.Lobbies
         ChangedLobbyValue<bool> IsLocked { get; }
 
         /// <summary>
-        /// The change to the available slots in the lobby, if it has changed any.
+        /// The change for if HasPassword has changed.
+        /// </summary>
+        ChangedLobbyValue<bool> HasPassword { get; }
+
+        /// The change to the available slots in the lobby, if it has changed.
         /// </summary>
         ChangedLobbyValue<int> AvailableSlots { get; }
 
@@ -66,7 +70,7 @@ namespace Unity.Services.Lobbies
         ChangedLobbyValue<string> HostId { get; }
 
         /// <summary>
-        /// The changes to the lobby’s host ID, if it has changed.
+        /// The changes to the lobby’s version, if it has changed.
         /// </summary>
         ChangedLobbyValue<int> Version { get; }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -43,7 +44,8 @@ internal static class LobbyPatcher
     {
         if (changes.LobbyDeleted)
         {
-            Debug.LogWarning("Attempting to apply changes to lobby, but the lobby has been deleted. Check if a lobby has been deleted by checking .LobbyDeleted");
+            Debug.LogWarning(
+                "Attempting to apply changes to lobby, but the lobby has been deleted. Check if a lobby has been deleted by checking .LobbyDeleted");
             return;
         }
 
@@ -53,22 +55,32 @@ internal static class LobbyPatcher
         {
             lobbyToChange.Name = changes.Name.Value;
         }
+
         if (changes.IsPrivate.Changed)
         {
             lobbyToChange.IsPrivate = changes.IsPrivate.Value;
         }
+
         if (changes.IsLocked.Changed)
         {
             lobbyToChange.IsLocked = changes.IsLocked.Value;
         }
+
+        if (changes.HasPassword.Changed)
+        {
+            lobbyToChange.HasPassword = changes.HasPassword.Value;
+        }
+
         if (changes.AvailableSlots.Changed)
         {
             lobbyToChange.AvailableSlots = changes.AvailableSlots.Value;
         }
+
         if (changes.MaxPlayers.Changed)
         {
             lobbyToChange.MaxPlayers = changes.MaxPlayers.Value;
         }
+
         if (changes.Data.Removed)
         {
             if (lobbyToChange.Data != null)
@@ -82,11 +94,16 @@ internal static class LobbyPatcher
             {
                 lobbyToChange.Data = new Dictionary<string, DataObject>();
             }
+
             foreach (var change in changes.Data.Value)
             {
                 if (change.Value.Removed)
                 {
                     lobbyToChange.Data.Remove(change.Key);
+                }
+                else if (change.Value.Added)
+                {
+                    lobbyToChange.Data.Add(change.Key, change.Value.Value);
                 }
                 else
                 {
@@ -94,6 +111,7 @@ internal static class LobbyPatcher
                 }
             }
         }
+
         // It is important that we remove players before adding new players.
         // Removing, then adding, is expected by the service.
         if (changes.PlayerLeft.Changed)
@@ -120,17 +138,20 @@ internal static class LobbyPatcher
                 lobbyToChange.Players.RemoveAt(playerLeftIndex); // TODO: Check if the index is valid
             }
         }
+
         if (changes.PlayerJoined.Changed)
         {
             if (lobbyToChange.Players == null)
             {
                 lobbyToChange.Players = new List<Player>(changes.PlayerJoined.Value.Count);
             }
+
             foreach (var playerJoined in changes.PlayerJoined.Value)
             {
                 lobbyToChange.Players.Insert(playerJoined.PlayerIndex, playerJoined.Player);
             }
         }
+
         if (changes.PlayerData.Changed)
         {
             foreach (var playerDataChanged in changes.PlayerData.Value)
@@ -142,10 +163,12 @@ internal static class LobbyPatcher
                 {
                     playerToChange.ConnectionInfo = playerDataChanged.Value.ConnectionInfoChanged.Value;
                 }
+
                 if (dataChanged.LastUpdatedChanged.Changed)
                 {
                     playerToChange.LastUpdated = dataChanged.LastUpdatedChanged.Value;
                 }
+
                 if (dataChanged.ChangedData.Removed)
                 {
                     if (playerToChange.Data != null)
@@ -159,11 +182,16 @@ internal static class LobbyPatcher
                     {
                         playerToChange.Data = new Dictionary<string, PlayerDataObject>();
                     }
+
                     foreach (var keyValuePair in dataChanged.ChangedData.Value)
                     {
                         if (keyValuePair.Value.Removed)
                         {
                             playerToChange.Data.Remove(keyValuePair.Key);
+                        }
+                        else if (keyValuePair.Value.Added)
+                        {
+                            playerToChange.Data.Add(keyValuePair.Key, keyValuePair.Value.Value);
                         }
                         else
                         {
@@ -173,20 +201,200 @@ internal static class LobbyPatcher
                 }
             }
         }
+
         if (changes.Version.Changed)
         {
             lobbyToChange.Version = changes.Version.Value;
         }
+
         // The HostId is related to the players, so applying this after editing players is preferred.
         if (changes.HostId.Changed)
         {
             lobbyToChange.HostId = changes.HostId.Value;
         }
+
         if (changes.LastUpdated.Changed)
         {
             lobbyToChange.LastUpdated = changes.LastUpdated.Value;
         }
     }
+
+    internal static LobbyPatcherChanges GetLobbyDiff(Lobby lobby1, Lobby lobby2)
+    {
+        var changes = new LobbyPatcherChanges(lobby1.Version);
+        if (lobby2 == null)
+        {
+            changes.LobbyDeletedChange();
+            return changes;
+        }
+
+        // No changes
+        if (lobby1.Version == lobby2.Version)
+            return changes;
+
+        // Old and New lobby ordered by version
+        var oldLobby = lobby1.Version < lobby2.Version ? lobby1 : lobby2;
+        var newLobby = lobby1.Version > lobby2.Version ? lobby1 : lobby2;
+
+        // Now that we have two valid lobbies, reassign the changes
+        changes = new LobbyPatcherChanges(newLobby.Version);
+
+        if (oldLobby.Name != null && !oldLobby.Name.Equals(newLobby.Name))
+            changes.NameChange(newLobby.Name);
+
+        if (oldLobby.IsPrivate != newLobby.IsPrivate)
+            changes.IsPrivateChange(newLobby.IsPrivate);
+
+        if (oldLobby.IsLocked != newLobby.IsLocked)
+            changes.IsLockedChange(newLobby.IsLocked);
+
+        if (oldLobby.AvailableSlots != newLobby.AvailableSlots)
+            changes.AvailableSlotsChange(newLobby.AvailableSlots);
+
+        if (oldLobby.MaxPlayers != newLobby.MaxPlayers)
+            changes.MaxPlayersChange(newLobby.MaxPlayers);
+
+        if (oldLobby.HostId != null && !oldLobby.HostId.Equals(newLobby.HostId))
+            changes.HostChange(newLobby.HostId);
+
+        if (!oldLobby.LastUpdated.Equals(newLobby.LastUpdated))
+            changes.LastUpdatedChange(newLobby.LastUpdated);
+
+        if (newLobby.Data == null)
+            changes.DataRemoveChange();
+        else
+        {
+            // Add the new lobby new values in the changes
+            foreach (var dataKey in newLobby.Data.Keys)
+            {
+                if (oldLobby.Data == null || !oldLobby.Data.ContainsKey(dataKey) || oldLobby.Data[dataKey] == null)
+                    changes.DataAdded(dataKey, newLobby.Data[dataKey]);
+            }
+
+            // Check for old lobby values changes
+            if (oldLobby.Data != null)
+            {
+                foreach (var dataKey in oldLobby.Data.Keys)
+                {
+                    if (!newLobby.Data.ContainsKey(dataKey) || newLobby.Data[dataKey] == null)
+                        changes.DataRemoveChange(dataKey);
+                    else if (oldLobby.Data[dataKey] == null)
+                        changes.DataAdded(dataKey, newLobby.Data[dataKey]);
+                    else if (!IsLobbyDataEqual(oldLobby.Data[dataKey], newLobby.Data[dataKey]))
+                        changes.DataChange(dataKey, newLobby.Data[dataKey]);
+                }
+            }
+        }
+
+        // If there are no players left in the second lobby
+        if (newLobby.Players == null || newLobby.Players.Count == 0)
+        {
+            // If all players left
+            if (oldLobby.Players != null)
+            {
+                for (int playerId = oldLobby.Players.Count - 1; playerId >= 0; playerId--)
+                {
+                    changes.PlayerLeftChange(playerId);
+                }
+            }
+            return changes;
+        }
+
+        List<Player> playersAfterRemoval = null;
+
+        // Check for old lobby players changes
+        if (oldLobby.Players != null)
+        {
+            playersAfterRemoval = new List<Player>(oldLobby.Players);
+
+            var oldLobbyPlayersIdxById = new Dictionary<string, int>(oldLobby.Players.Count);
+            for (int oldPlayerIdx = 0; oldPlayerIdx < oldLobby.Players.Count; oldPlayerIdx++)
+                oldLobbyPlayersIdxById.Add(oldLobby.Players[oldPlayerIdx].Id, oldPlayerIdx);
+
+            var newLobbyPlayersIdxById = new Dictionary<string, int>(newLobby.Players.Count);
+            for (int newPlayerIdx = 0; newPlayerIdx < newLobby.Players.Count; newPlayerIdx++)
+                newLobbyPlayersIdxById.Add(newLobby.Players[newPlayerIdx].Id, newPlayerIdx);
+
+            for (int playerIdx = oldLobby.Players.Count - 1; playerIdx >= 0; playerIdx--)
+            {
+                var oldLobbyPlayer = oldLobby.Players[playerIdx];
+
+                // If player is not in the second lobby
+                if (!newLobbyPlayersIdxById.ContainsKey(oldLobbyPlayer.Id))
+                {
+                    changes.PlayerLeftChange(playerIdx);
+                    playersAfterRemoval.RemoveAt(playerIdx);
+                    continue;
+                }
+
+                var newLobbyPlayerIdx = newLobbyPlayersIdxById[oldLobbyPlayer.Id];
+                var newLobbyPlayer = newLobby.Players[newLobbyPlayerIdx];
+
+                if (oldLobbyPlayer.LastUpdated == null || !oldLobbyPlayer.LastUpdated.Equals(newLobbyPlayer.LastUpdated))
+                    changes.PlayerLastUpdatedChange(newLobbyPlayerIdx, newLobbyPlayer.LastUpdated);
+
+                if (oldLobbyPlayer.ConnectionInfo == null || !oldLobbyPlayer.ConnectionInfo.Equals(newLobbyPlayer.ConnectionInfo))
+                    changes.PlayerConnectionInfoChange(newLobbyPlayerIdx, newLobbyPlayer.ConnectionInfo);
+
+                // if the data has been completely removed
+                if (oldLobbyPlayer.Data != null && newLobbyPlayer.Data == null)
+                    changes.PlayerDataRemoveChange(playerIdx);
+                // if the data has been added from scratch
+                else if (oldLobbyPlayer.Data == null && newLobbyPlayer.Data != null)
+                {
+                    foreach (var dataKey in newLobbyPlayer.Data.Keys)
+                    {
+                        changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                    }
+                }
+                // if both are populated, we need a diff
+                else if (oldLobbyPlayer.Data != null && newLobbyPlayer.Data != null)
+                {
+                    // Check for player data added
+                    foreach (var dataKey in newLobbyPlayer.Data.Keys)
+                    {
+                        if (!oldLobbyPlayer.Data.ContainsKey(dataKey) || oldLobbyPlayer.Data[dataKey] == null)
+                            changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                    }
+
+                    // Check for player data removed or changed
+                    using var oldLobbyDataKeyCursor = oldLobbyPlayer.Data.Keys.GetEnumerator();
+                    foreach (var dataKey in oldLobbyPlayer.Data.Keys)
+                    {
+                        if (!newLobbyPlayer.Data.ContainsKey(dataKey) || newLobbyPlayer.Data[dataKey] == null)
+                            changes.PlayerDataRemoveChange(playerIdx, dataKey);
+                        else if (oldLobbyPlayer.Data[dataKey] == null)
+                            changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                        else if (!IsPlayerDataEqual(oldLobbyPlayer.Data[dataKey], newLobbyPlayer.Data[dataKey]))
+                            changes.PlayerDataChange(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                    }
+                }
+            }
+        }
+
+        // Check for players joined
+        if (newLobby.Players != null)
+        {
+            for (int secondLobbyPlayerIdx = 0; secondLobbyPlayerIdx < newLobby.Players.Count; secondLobbyPlayerIdx++)
+            {
+                if (playersAfterRemoval == null)
+                {
+                    changes.PlayerJoinedChange(secondLobbyPlayerIdx, newLobby.Players[secondLobbyPlayerIdx]);
+                    continue;
+                }
+                if (playersAfterRemoval.Count <= secondLobbyPlayerIdx || !playersAfterRemoval[secondLobbyPlayerIdx].Id.Equals(newLobby.Players[secondLobbyPlayerIdx].Id))
+                    changes.PlayerJoinedChange(secondLobbyPlayerIdx, newLobby.Players[secondLobbyPlayerIdx]);
+            }
+        }
+
+        return changes;
+    }
+
+    private static bool IsLobbyDataEqual(DataObject d1, DataObject d2) =>
+        d1.Value == d2.Value && d1.Index == d2.Index && d1.Visibility == d2.Visibility;
+
+    private static bool IsPlayerDataEqual(PlayerDataObject d1, PlayerDataObject d2) =>
+        d1.Value == d2.Value && d1.Visibility == d2.Visibility;
 
     internal static LobbyPatcherChanges GetLobbyChanges(string json)
     {
@@ -194,11 +402,13 @@ internal static class LobbyPatcher
         {
             Debug.LogError("Unable to apply patches to lobby as the provided JSON was null!");
         }
+
         var lobbyPatches = JsonConvert.DeserializeObject<LobbyPatches>(json);
         if (lobbyPatches == null)
         {
             Debug.LogError("Unable to deserialize JSON to LobbyPatches!");
         }
+
         return GetLobbyPatches(lobbyPatches);
     }
 
@@ -209,11 +419,13 @@ internal static class LobbyPatcher
             Debug.LogWarning("Attempting to apply patches to lobby, but there were no patches to apply.");
             return new LobbyPatcherChanges(lobbyPatches.Version);
         }
+
         var changes = new LobbyPatcherChanges(lobbyPatches.Version);
         foreach (var patchToApply in lobbyPatches.Patches)
         {
             ParseLobbyPatch(patchToApply, changes);
         }
+
         return changes;
     }
 
@@ -248,6 +460,8 @@ internal static class LobbyPatcher
                 { changes.IsPrivateChange((bool)patch.value); break; }
                 case "/isLocked":
                 { changes.IsLockedChange((bool)patch.value); break; }
+                case "/hasPassword":
+                { changes.HasPasswordChange((bool)patch.value); break; }
                 case "/availableSlots":
                 { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
                 case "/maxPlayers":
@@ -283,6 +497,8 @@ internal static class LobbyPatcher
                 { changes.IsPrivateChange((bool)patch.value); break; }
                 case "/isLocked":
                 { changes.IsLockedChange((bool)patch.value); break; }
+                case "/hasPassword":
+                { changes.HasPasswordChange((bool)patch.value); break; }
                 case "/availableSlots":
                 { changes.AvailableSlotsChange((int)(Int64)patch.value); break; }
                 case "/maxPlayers":
@@ -316,6 +532,8 @@ internal static class LobbyPatcher
                 { changes.IsPrivateChange(false); break; }
                 case "/isLocked":
                 { changes.IsLockedChange(false); break; }
+                case "/hasPassword":
+                { changes.HasPasswordChange(false); break; }
                 case "/availableSlots":
                 { changes.AvailableSlotsChange(0); break; }
                 case "/maxPlayers":
@@ -335,7 +553,7 @@ internal static class LobbyPatcher
     {
         foreach (var dataToAdd in data)
         {
-            changes.DataChange(dataToAdd.Key, dataToAdd.Value.ToObject<DataObject>());
+            changes.DataAdded(dataToAdd.Key, dataToAdd.Value.ToObject<DataObject>());
         }
     }
 
@@ -399,7 +617,7 @@ internal static class LobbyPatcher
         var path = GetPlayerPathAndIndex(patch, out var index);
         if (path.StartsWith("/data"))
         {
-            ParseAddOrReplacePlayerData(index, patch, path, changes);
+            ParseAddOrReplacePlayerData(index, patch, path, changes, isAdding: true);
         }
         else
         {
@@ -461,14 +679,17 @@ internal static class LobbyPatcher
         changes.PlayerJoinedChange(index, player);
     }
 
-    private static void ParseAddOrReplacePlayerData(int index, LobbyPatch patch, string path, LobbyPatcherChanges changes)
+    private static void ParseAddOrReplacePlayerData(int index, LobbyPatch patch, string path, LobbyPatcherChanges changes, bool isAdding = false)
     {
         if (path == "/data")
         {
             var data = (JObject)patch.value;
             foreach (var dataToAdd in data)
             {
-                changes.PlayerDataChange(index, dataToAdd.Key, dataToAdd.Value.ToObject<PlayerDataObject>());
+                if (isAdding)
+                    changes.PlayerDataAdded(index, dataToAdd.Key, dataToAdd.Value.ToObject<PlayerDataObject>());
+                else
+                    changes.PlayerDataChange(index, dataToAdd.Key, dataToAdd.Value.ToObject<PlayerDataObject>());
             }
         }
         else
@@ -476,7 +697,10 @@ internal static class LobbyPatcher
             var sections = patch.path.Split('/');
             var key = sections[4];
             var obj = (JObject)patch.value;
-            changes.PlayerDataChange(index, key, obj.ToObject<PlayerDataObject>());
+            if (isAdding)
+                changes.PlayerDataAdded(index, key, obj.ToObject<PlayerDataObject>());
+            else
+                changes.PlayerDataChange(index, key, obj.ToObject<PlayerDataObject>());
         }
     }
 

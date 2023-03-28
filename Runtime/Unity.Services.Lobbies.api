@@ -3,9 +3,18 @@
 // make sure the XML doc file is present and located next to the scraped dll
 public class LobbyEventCallbacks
 {
+    public event System.Action<System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.DataObject>>> DataAdded;
+    public event System.Action<System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.DataObject>>> DataChanged;
+    public event System.Action<System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.DataObject>>> DataRemoved;
     public event System.Action KickedFromLobby;
     public event System.Action<Unity.Services.Lobbies.ILobbyChanges> LobbyChanged;
+    public event System.Action LobbyDeleted;
     public event System.Action<Unity.Services.Lobbies.LobbyEventConnectionState> LobbyEventConnectionStateChanged;
+    public event System.Action<System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.PlayerDataObject>>>> PlayerDataAdded;
+    public event System.Action<System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.PlayerDataObject>>>> PlayerDataChanged;
+    public event System.Action<System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Unity.Services.Lobbies.Models.PlayerDataObject>>>> PlayerDataRemoved;
+    public event System.Action<System.Collections.Generic.List<Unity.Services.Lobbies.LobbyPlayerJoined>> PlayerJoined;
+    public event System.Action<System.Collections.Generic.List<int>> PlayerLeft;
     public LobbyEventCallbacks() {}
 }
 
@@ -13,6 +22,7 @@ namespace Unity.Services.Lobbies
 {
     public struct ChangedLobbyValue<T>
     {
+        public bool Added { get; }
         public bool Changed { get; }
         public T Value { get; }
         public ChangedLobbyValue(T value) {}
@@ -21,6 +31,7 @@ namespace Unity.Services.Lobbies
     public struct ChangedOrRemovedLobbyValue<T>
     {
         public static readonly Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<T> RemoveThisValue;
+        public bool Added { get; }
         public bool Changed { get; }
         public LobbyValueChangeType ChangeType { get; }
         public bool Removed { get; }
@@ -31,7 +42,9 @@ namespace Unity.Services.Lobbies
     public class CreateLobbyOptions
     {
         public System.Collections.Generic.Dictionary<string, Models.DataObject> Data { get; set; }
+        public System.Nullable<bool> IsLocked { get; set; }
         public System.Nullable<bool> IsPrivate { get; set; }
+        public string Password { get; set; }
         public Models.Player Player { get; set; }
         public CreateLobbyOptions() {}
     }
@@ -40,6 +53,7 @@ namespace Unity.Services.Lobbies
     {
         public Unity.Services.Lobbies.ChangedLobbyValue<int> AvailableSlots { get; }
         public Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<System.Collections.Generic.Dictionary<string, Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<Models.DataObject>>> Data { get; }
+        public Unity.Services.Lobbies.ChangedLobbyValue<bool> HasPassword { get; }
         public Unity.Services.Lobbies.ChangedLobbyValue<string> HostId { get; }
         public Unity.Services.Lobbies.ChangedLobbyValue<bool> IsLocked { get; }
         public Unity.Services.Lobbies.ChangedLobbyValue<bool> IsPrivate { get; }
@@ -91,12 +105,14 @@ namespace Unity.Services.Lobbies
 
     public class JoinLobbyByCodeOptions
     {
+        public string Password { get; set; }
         public Models.Player Player { get; set; }
         public JoinLobbyByCodeOptions() {}
     }
 
     public class JoinLobbyByIdOptions
     {
+        public string Password { get; set; }
         public Models.Player Player { get; set; }
         public JoinLobbyByIdOptions() {}
     }
@@ -131,13 +147,16 @@ namespace Unity.Services.Lobbies
         GatewayTimeout = 16504,
         Gone = 16410,
         HttpVersionNotSupported = 16505,
+        IncorrectPassword = 16009,
         InsufficientStorage = 16507,
         InternalServerError = 16500,
         InvalidArgument = 16400,
         LengthRequired = 16411,
+        LobbyAlreadyExists = 16007,
         LobbyConflict = 16003,
         LobbyEventServiceConnectionError = 16604,
         LobbyFull = 16004,
+        LobbyLocked = 16005,
         LobbyNotFound = 16001,
         Locked = 16423,
         LoopDetected = 16508,
@@ -207,6 +226,8 @@ namespace Unity.Services.Lobbies
 
     public static class LobbyValue
     {
+        public static Unity.Services.Lobbies.ChangedLobbyValue<T> Added<T>(T value);
+        public static Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<T> ChangeAdded<T>(T value);
         public static Unity.Services.Lobbies.ChangedLobbyValue<T> Changed<T>(T value);
         public static Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<T> ChangedNotRemoved<T>(T value);
         public static Unity.Services.Lobbies.ChangedOrRemovedLobbyValue<T> Removed<T>();
@@ -214,6 +235,7 @@ namespace Unity.Services.Lobbies
 
     public enum LobbyValueChangeType
     {
+        Added = 3,
         Changed = 1,
         Removed = 2,
         Unchanged = 0,
@@ -245,6 +267,7 @@ namespace Unity.Services.Lobbies
         public System.Nullable<bool> IsPrivate { get; set; }
         public System.Nullable<int> MaxPlayers { get; set; }
         public string Name { get; set; }
+        public string Password { get; set; }
         public UpdateLobbyOptions() {}
     }
 
@@ -313,8 +336,9 @@ namespace Unity.Services.Lobbies.Models
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, Name = @"isPrivate")] [UnityEngine.Scripting.Preserve] public System.Nullable<bool> IsPrivate { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, IsRequired = true, Name = @"maxPlayers")] [UnityEngine.Scripting.Preserve] public int MaxPlayers { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, IsRequired = true, Name = @"name")] [UnityEngine.Scripting.Preserve] public string Name { get; }
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"password")] [UnityEngine.Scripting.Preserve] public string Password { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"player")] [UnityEngine.Scripting.Preserve] public Player Player { get; }
-        [UnityEngine.Scripting.Preserve] public CreateRequest(string name, int maxPlayers, System.Nullable<bool> isPrivate = False, System.Nullable<bool> isLocked = False, Player player = default(Player), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>)) {}
+        [UnityEngine.Scripting.Preserve] public CreateRequest(string name, int maxPlayers, System.Nullable<bool> isPrivate = False, System.Nullable<bool> isLocked = False, Player player = default(Player), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>), string password = default(string)) {}
     }
 
     [System.Runtime.Serialization.DataContract(Name = @"DataObject")] [UnityEngine.Scripting.Preserve] public class DataObject
@@ -371,8 +395,16 @@ namespace Unity.Services.Lobbies.Models
     [System.Runtime.Serialization.DataContract(Name = @"JoinByCodeRequest")] [UnityEngine.Scripting.Preserve] public class JoinByCodeRequest
     {
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, IsRequired = true, Name = @"lobbyCode")] [UnityEngine.Scripting.Preserve] public string LobbyCode { get; }
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"password")] [UnityEngine.Scripting.Preserve] public string Password { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"player")] [UnityEngine.Scripting.Preserve] public Player Player { get; }
-        [UnityEngine.Scripting.Preserve] public JoinByCodeRequest(string lobbyCode, Player player = default(Player)) {}
+        [UnityEngine.Scripting.Preserve] public JoinByCodeRequest(string lobbyCode, Player player = default(Player), string password = default(string)) {}
+    }
+
+    [System.Runtime.Serialization.DataContract(Name = @"JoinByIdRequest")] [UnityEngine.Scripting.Preserve] public class JoinByIdRequest
+    {
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"password")] [UnityEngine.Scripting.Preserve] public string Password { get; }
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"player")] [UnityEngine.Scripting.Preserve] public Player Player { get; }
+        [UnityEngine.Scripting.Preserve] public JoinByIdRequest(string password = default(string), Player player = default(Player)) {}
     }
 
     [System.Runtime.Serialization.DataContract(Name = @"Lobby")] [UnityEngine.Scripting.Preserve] public class Lobby
@@ -381,6 +413,7 @@ namespace Unity.Services.Lobbies.Models
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"created")] [UnityEngine.Scripting.Preserve] public System.DateTime Created { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"data")] [UnityEngine.Scripting.Preserve] public System.Collections.Generic.Dictionary<string, DataObject> Data { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"environmentId")] [UnityEngine.Scripting.Preserve] public string EnvironmentId { get; }
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, Name = @"hasPassword")] [UnityEngine.Scripting.Preserve] public bool HasPassword { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"hostId")] [UnityEngine.Scripting.Preserve] public string HostId { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"id")] [UnityEngine.Scripting.Preserve] public string Id { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, Name = @"isLocked")] [UnityEngine.Scripting.Preserve] public bool IsLocked { get; }
@@ -392,7 +425,7 @@ namespace Unity.Services.Lobbies.Models
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"players")] [UnityEngine.Scripting.Preserve] public System.Collections.Generic.List<Player> Players { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"upid")] [UnityEngine.Scripting.Preserve] public string Upid { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"version")] [UnityEngine.Scripting.Preserve] public int Version { get; set; }
-        [UnityEngine.Scripting.Preserve] public Lobby(string id = default(string), string lobbyCode = default(string), string upid = default(string), string environmentId = default(string), string name = default(string), int maxPlayers = 0, int availableSlots = 0, bool isPrivate = false, bool isLocked = false, System.Collections.Generic.List<Player> players = default(System.Collections.Generic.List<Player>), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>), string hostId = default(string), System.DateTime created = default(System.DateTime), System.DateTime lastUpdated = default(System.DateTime)) {}
+        [UnityEngine.Scripting.Preserve] public Lobby(string id = default(string), string lobbyCode = default(string), string upid = default(string), string environmentId = default(string), string name = default(string), int maxPlayers = 0, int availableSlots = 0, bool isPrivate = false, bool isLocked = false, System.Collections.Generic.List<Player> players = default(System.Collections.Generic.List<Player>), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>), string hostId = default(string), System.DateTime created = default(System.DateTime), System.DateTime lastUpdated = default(System.DateTime), int version = 0, bool hasPassword = false) {}
     }
 
     [System.Runtime.Serialization.DataContract(Name = @"Player")] [UnityEngine.Scripting.Preserve] public class Player
@@ -404,7 +437,7 @@ namespace Unity.Services.Lobbies.Models
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"joined")] [UnityEngine.Scripting.Preserve] public System.DateTime Joined { get; set; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"lastUpdated")] [UnityEngine.Scripting.Preserve] public System.DateTime LastUpdated { get; set; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"profile")] [UnityEngine.Scripting.Preserve] public PlayerProfile Profile { get; set; }
-        [UnityEngine.Scripting.Preserve] public Player(string id = default(string), string connectionInfo = default(string), System.Collections.Generic.Dictionary<string, PlayerDataObject> data = default(System.Collections.Generic.Dictionary<string, PlayerDataObject>), string allocationId = default(string), System.DateTime joined = default(System.DateTime), System.DateTime lastUpdated = default(System.DateTime)) {}
+        [UnityEngine.Scripting.Preserve] public Player(string id = default(string), string connectionInfo = default(string), System.Collections.Generic.Dictionary<string, PlayerDataObject> data = default(System.Collections.Generic.Dictionary<string, PlayerDataObject>), string allocationId = default(string), System.DateTime joined = default(System.DateTime), System.DateTime lastUpdated = default(System.DateTime), PlayerProfile profile = default(PlayerProfile)) {}
     }
 
     [System.Runtime.Serialization.DataContract(Name = @"PlayerDataObject")] [UnityEngine.Scripting.Preserve] public class PlayerDataObject
@@ -444,6 +477,7 @@ namespace Unity.Services.Lobbies.Models
         {
             [System.Runtime.Serialization.EnumMember(Value = @"AvailableSlots")] AvailableSlots = 2,
             [System.Runtime.Serialization.EnumMember(Value = @"Created")] Created = 4,
+            [System.Runtime.Serialization.EnumMember(Value = @"HasPassword")] HasPassword = 17,
             [System.Runtime.Serialization.EnumMember(Value = @"IsLocked")] IsLocked = 16,
             [System.Runtime.Serialization.EnumMember(Value = @"LastUpdated")] LastUpdated = 5,
             [System.Runtime.Serialization.EnumMember(Value = @"MaxPlayers")] MaxPlayers = 1,
@@ -548,7 +582,8 @@ namespace Unity.Services.Lobbies.Models
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = true, Name = @"isPrivate")] [UnityEngine.Scripting.Preserve] public System.Nullable<bool> IsPrivate { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"maxPlayers")] [UnityEngine.Scripting.Preserve] public System.Nullable<int> MaxPlayers { get; }
         [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"name")] [UnityEngine.Scripting.Preserve] public string Name { get; }
-        [UnityEngine.Scripting.Preserve] public UpdateRequest(string name = default(string), System.Nullable<int> maxPlayers = default(System.Nullable<int>), System.Nullable<bool> isPrivate = default(System.Nullable<bool>), System.Nullable<bool> isLocked = default(System.Nullable<bool>), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>), string hostId = default(string)) {}
+        [System.Runtime.Serialization.DataMember(EmitDefaultValue = false, Name = @"password")] [UnityEngine.Scripting.Preserve] public string Password { get; }
+        [UnityEngine.Scripting.Preserve] public UpdateRequest(string name = default(string), System.Nullable<int> maxPlayers = default(System.Nullable<int>), System.Nullable<bool> isPrivate = default(System.Nullable<bool>), System.Nullable<bool> isLocked = default(System.Nullable<bool>), System.Collections.Generic.Dictionary<string, DataObject> data = default(System.Collections.Generic.Dictionary<string, DataObject>), string hostId = default(string), string password = default(string)) {}
     }
 }
 

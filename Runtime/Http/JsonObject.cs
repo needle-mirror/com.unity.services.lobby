@@ -56,7 +56,7 @@ namespace Unity.Services.Lobbies.Http
                 {
                     return obj.ToString();
                 }
-                
+
                 return JsonConvert.SerializeObject(obj);
             }
             catch (System.Exception)
@@ -209,7 +209,7 @@ namespace Unity.Services.Lobbies.Http
         private void ValidatePropertyInfos<T>(T objectToCheck, List<string> errors)
         {
             var propertyInfos = objectToCheck.GetType().GetProperties();
-            
+
             foreach (var propertyInfo in propertyInfos)
             {
                 if (propertyInfo.GetIndexParameters().Length > 0)
@@ -223,15 +223,15 @@ namespace Unity.Services.Lobbies.Http
                     }
                 }
                 else
-                { 
+                {
                     var value = propertyInfo.GetValue(objectToCheck);
                     var memberName = propertyInfo.Name;
                     var objectName = objectToCheck.GetType().Name;
                     ValidateValue(value, objectName, "Property", memberName, errors);
                 }
-            } 
+            }
         }
-                                        
+
         private void ValidateFieldInfos<T>(T objectToCheck, List<string> errors)
         {
             var fieldInfos = objectToCheck.GetType().GetFields();

@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Unity.Services.Core",
-        "Unity.Services.Core.Internal"
+        "Unity.Services.Core.Internal",
+        "Unity.Services.Authentication"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -48,21 +48,21 @@ namespace Unity.Services.Lobbies.Models
         [Preserve]
         [DataMember(Name = "connectionInfo", EmitDefaultValue = false)]
         public string ConnectionInfo{ get; }
-        
+
         /// <summary>
         /// Custom game-specific properties to add, update, or remove from the player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).  To remove an existing property, include it in &#x60;data&#x60; but set the property object to &#x60;null&#x60;.  To update the value to &#x60;null&#x60;, set the &#x60;value&#x60; property of the object to &#x60;null&#x60;.
         /// </summary>
         [Preserve][JsonConverter(typeof(JsonObjectCollectionConverter))]
         [DataMember(Name = "data", EmitDefaultValue = false)]
         public JsonObject Data { get; }
-        
+
         /// <summary>
         /// The &#x60;allocationId&#x60; from the Relay service which associates this player in this lobby with a persistent connection.  When a disconnect notification is received, this value is used to identify the associated player in a lobby to mark them as disconnected.
         /// </summary>
         [Preserve]
         [DataMember(Name = "allocationId", EmitDefaultValue = false)]
         public string AllocationId{ get; }
-    
+
         /// <summary>
         /// Formats a PlayerUpdateRequest into a string of key-value pairs for use as a path parameter.
         /// </summary>
@@ -99,13 +99,13 @@ namespace Unity.Services.Lobbies.Models
                 var connectionInfoStringValue = ConnectionInfo.ToString();
                 dictionary.Add("connectionInfo", connectionInfoStringValue);
             }
-            
+
             if (AllocationId != null)
             {
                 var allocationIdStringValue = AllocationId.ToString();
                 dictionary.Add("allocationId", allocationIdStringValue);
             }
-            
+
             return dictionary;
         }
     }

@@ -6,7 +6,7 @@ namespace Unity.Services.Lobbies
     /// <summary>
     /// Optional parameter class for Lobby creation requests.
     /// </summary>
-    public class CreateLobbyOptions 
+    public class CreateLobbyOptions
     {
         /// <summary>
         /// Indicates whether or not the lobby is publicly visible and will show up in query results.
@@ -14,6 +14,17 @@ namespace Unity.Services.Lobbies
         /// If left as null, a default value will be used.
         /// </summary>
         public bool? IsPrivate { get; set; }
+
+        /// <summary>
+        /// If supplied, adds a password to this lobby; any player wishing to join needs to provide the matching password.
+        /// Minimum password length is 8, maximum is 64
+        /// </summary>
+        public string Password { get; set; }
+
+        /// Indicates whether or not the lobby is locked.
+        /// If left as null, a default value will be used.
+        /// </summary>
+        public bool? IsLocked { get; set; }
 
         /// <summary>
         /// Information about a specific player creating the lobby.

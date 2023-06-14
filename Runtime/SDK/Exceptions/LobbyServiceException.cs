@@ -1,5 +1,7 @@
 using System;
 using Unity.Services.Core;
+using Unity.Services.Lobbies.Http;
+using Unity.Services.Lobbies.Models;
 
 namespace Unity.Services.Lobbies
 {
@@ -12,6 +14,18 @@ namespace Unity.Services.Lobbies
         /// The reason of the exception.
         /// </summary>
         public LobbyExceptionReason Reason { get; private set; }
+
+        /// <summary>
+        /// If applicable, the specific details of the API error that caused the exception.
+        /// </summary>
+        public ErrorStatus ApiError
+        {
+            get
+            {
+                HttpException<ErrorStatus> apiException = InnerException as HttpException<ErrorStatus>;
+                return apiException?.ActualError;
+            }
+        }
 
         /// <summary>
         /// Creates a LobbyServiceException.
@@ -52,7 +66,7 @@ namespace Unity.Services.Lobbies
         }
 
         /// <summary>
-        /// Creates a RelayServiceException.
+        /// Creates a LobbyServiceException.
         /// </summary>
         /// <param name="innerException">The exception raised by the service, if any.</param>
         public LobbyServiceException(Exception innerException) : base((int)LobbyExceptionReason.Unknown, "Unknown Lobby Service Exception", innerException)

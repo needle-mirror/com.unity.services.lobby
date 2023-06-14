@@ -55,9 +55,14 @@ namespace Unity.Services.Lobbies
         LobbyAlreadyExists = 16007,
 
         /// <summary>
-        /// Player attempted to join with a password that did not match the lobby's password
+        /// Player attempted to join a lobby with a password that did not match the lobby's password.
         /// </summary>
         IncorrectPassword = 16009,
+
+        /// <summary>
+        /// Player attempted to join a lobby with an invalid join code (e.g. it contained invalid characters).
+        /// </summary>
+        InvalidJoinCode = 16010,
         #endregion
 
         #region Http Errors

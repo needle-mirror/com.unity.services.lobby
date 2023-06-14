@@ -96,7 +96,7 @@ namespace Unity.Services.Lobbies.Internal
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Logger.LogException(ex);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Unity.Services.Lobbies.Internal
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    Logger.LogException(e);
                 }
                 finally
                 {
@@ -194,7 +194,7 @@ namespace Unity.Services.Lobbies.Internal
 
             var newChanges = LobbyPatcher.GetLobbyDiff(cachedLobby, newLobby);
 
-            if (!WasRemovedFromLobby(newChanges))
+            if (!WasRemovedFromLobby(newChanges, cachedLobby))
                 newChanges.ApplyToLobby(cachedLobby);
 
             callbacks.InvokeLobbyChanged(newChanges);
@@ -217,7 +217,7 @@ namespace Unity.Services.Lobbies.Internal
             // Execute and apply event if it's the version we are waiting for
             if (eventLobbyVersion == cachedLobby.Version + 1)
             {
-                if (!WasRemovedFromLobby(changes))
+                if (!WasRemovedFromLobby(changes, cachedLobby))
                     changes.ApplyToLobby(cachedLobby);
                 callbacks.InvokeLobbyChanged(changes);
                 return true;
@@ -226,11 +226,9 @@ namespace Unity.Services.Lobbies.Internal
             return false;
         }
 
-        private bool WasRemovedFromLobby(ILobbyChanges changes)
+        private bool WasRemovedFromLobby(ILobbyChanges changes, Models.Lobby cachedLobby)
         {
             var lobbyCacheDict = (lobbyService as ILobbyServiceInternal) !.GetLobbyCache();
-            Models.Lobby cachedLobby;
-            lobbyCacheDict.TryGetValue(lobbyId, out cachedLobby);
 
             if (cachedLobby == null || !changes.PlayerLeft.Changed)
                 return false;

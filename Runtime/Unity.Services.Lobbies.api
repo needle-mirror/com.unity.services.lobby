@@ -151,6 +151,7 @@ namespace Unity.Services.Lobbies
         InsufficientStorage = 16507,
         InternalServerError = 16500,
         InvalidArgument = 16400,
+        InvalidJoinCode = 16010,
         LengthRequired = 16411,
         LobbyAlreadyExists = 16007,
         LobbyConflict = 16003,
@@ -217,6 +218,7 @@ namespace Unity.Services.Lobbies
 
     public class LobbyServiceException : Unity.Services.Core.RequestFailedException
     {
+        public Models.ErrorStatus ApiError { get; }
         public LobbyExceptionReason Reason { get; }
         public LobbyServiceException(System.Exception innerException) {}
         public LobbyServiceException(long errorCode, string message) {}

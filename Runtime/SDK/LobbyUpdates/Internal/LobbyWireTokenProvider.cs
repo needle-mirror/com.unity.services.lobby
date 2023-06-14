@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Wire.Internal;
-using UnityEngine;
 
 namespace Unity.Services.Lobbies.Internal
 {
@@ -16,11 +13,11 @@ namespace Unity.Services.Lobbies.Internal
         {
             if (lobbyId == null)
             {
-                Debug.LogError($"{nameof(LobbyWireTokenProvider)} is invalid as its {nameof(lobbyId)} is null!");
+                Logger.LogError($"{nameof(LobbyWireTokenProvider)} is invalid as its {nameof(lobbyId)} is null!");
             }
             if (lobbyService == null)
             {
-                Debug.LogError($"{nameof(LobbyWireTokenProvider)} is invalid as its {nameof(lobbyService)} is null!");
+                Logger.LogError($"{nameof(LobbyWireTokenProvider)} is invalid as its {nameof(lobbyService)} is null!");
             }
             this.lobbyId = lobbyId;
             this.lobbyService = lobbyService;

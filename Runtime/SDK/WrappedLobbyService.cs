@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies.Http;
+using Unity.Services.Lobbies.Apis.Lobby;
 using Unity.Services.Lobbies.Lobby;
-using Debug = Unity.Services.Lobbies.Logger;
 using Unity.Services.Core;
 
 namespace Unity.Services.Lobbies.Internal
@@ -22,16 +22,19 @@ namespace Unity.Services.Lobbies.Internal
 
         internal ILobbyServiceSdk m_LobbyService;
 
+        private readonly ApiTelemetryScopeFactory m_TelemetryScopeFactory;
+
         //Minimum value of a lobby error (used to elevate standard errors if unhandled)
         internal const int LOBBY_ERROR_MIN_RANGE = 16000;
 
         //Caches lobby data to be able to make diffs against Lobby versions.
-        //Refreshed with newer data when using GetLobby, CreateLobby and JoinLobby.
+        //Refreshed with newer data when using GetLobby, CreateLobby, JoinLobby, UpdateLobby, and UpdatePlayer.
         internal Dictionary<string, Models.Lobby> JoinedLobbyCache { get; }
 
         internal WrappedLobbyService(ILobbyServiceSdk lobbyService)
         {
             m_LobbyService = lobbyService;
+            m_TelemetryScopeFactory = new ApiTelemetryScopeFactory(lobbyService.Metrics);
             JoinedLobbyCache = new Dictionary<string, Models.Lobby>();
         }
 
@@ -48,7 +51,7 @@ namespace Unity.Services.Lobbies.Internal
             }
 
             var createRequest = ConvertCreateOptionsToRequest(lobbyName, maxPlayers, options);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateLobbyAsync, new CreateLobbyRequest(createRequest : createRequest));
+            var response = await TryCatchRequest(LobbyApiNames.CreateLobby, m_LobbyService.LobbyApi.CreateLobbyAsync, new CreateLobbyRequest(createRequest : createRequest));
             var lobby = response.Result;
             AddOrUpdateLobbyCache(lobby);
             return lobby;
@@ -78,7 +81,7 @@ namespace Unity.Services.Lobbies.Internal
                 createRequest: createRequest
             );
 
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.CreateOrJoinLobbyAsync, createOrJoinRequest);
+            var response = await TryCatchRequest(LobbyApiNames.CreateOrJoinLobby, m_LobbyService.LobbyApi.CreateOrJoinLobbyAsync, createOrJoinRequest);
             var lobby = response.Result;
             AddOrUpdateLobbyCache(lobby);
             return lobby;
@@ -105,7 +108,8 @@ namespace Unity.Services.Lobbies.Internal
             {
                 throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
-            await TryCatchRequest(m_LobbyService.LobbyApi.DeleteLobbyAsync, new DeleteLobbyRequest(lobbyId));
+
+            await TryCatchRequest(LobbyApiNames.DeleteLobby, m_LobbyService.LobbyApi.DeleteLobbyAsync, new DeleteLobbyRequest(lobbyId));
             if (JoinedLobbyCache.ContainsKey(lobbyId))
                 JoinedLobbyCache.Remove(lobbyId);
         }
@@ -114,7 +118,7 @@ namespace Unity.Services.Lobbies.Internal
         public async Task<List<string>> GetJoinedLobbiesAsync()
         {
             var request = new GetJoinedLobbiesRequest(null, null);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.GetJoinedLobbiesAsync, request);
+            var response = await TryCatchRequest(LobbyApiNames.GetJoinedLobbies, m_LobbyService.LobbyApi.GetJoinedLobbiesAsync, request);
             var lobbyIds = response.Result;
             return lobbyIds;
         }
@@ -127,7 +131,7 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
 
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.GetLobbyAsync, new GetLobbyRequest(lobbyId));
+            var response = await TryCatchRequest(LobbyApiNames.GetLobby, m_LobbyService.LobbyApi.GetLobbyAsync, new GetLobbyRequest(lobbyId));
             AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
@@ -140,7 +144,7 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
 
-            await TryCatchRequest(m_LobbyService.LobbyApi.HeartbeatAsync, new HeartbeatRequest(lobbyId));
+            await TryCatchRequest(LobbyApiNames.Heartbeat, m_LobbyService.LobbyApi.HeartbeatAsync, new HeartbeatRequest(lobbyId));
         }
 
         public async Task<Models.Lobby> JoinLobbyByCodeAsync(string lobbyCode, JoinLobbyByCodeOptions options = default)
@@ -154,7 +158,7 @@ namespace Unity.Services.Lobbies.Internal
             {
                 // NOTE: constructor not passing value by name to ensure this breaks on any regeneration that changes the order of existing arguments
                 var joinRequest = new JoinLobbyByCodeRequest(joinByCodeRequest: new JoinByCodeRequest(lobbyCode, options?.Player, options?.Password));
-                var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByCodeAsync, joinRequest);
+                var response = await TryCatchRequest(LobbyApiNames.JoinLobbyByCode, m_LobbyService.LobbyApi.JoinLobbyByCodeAsync, joinRequest);
                 AddOrUpdateLobbyCache(response.Result);
                 return response.Result;
             }
@@ -186,7 +190,8 @@ namespace Unity.Services.Lobbies.Internal
             {
                 var joinByIdRequest = new JoinByIdRequest(options?.Password, options?.Player);
                 var joinRequest = new JoinLobbyByIdRequest(lobbyId, joinByIdRequest: joinByIdRequest);
-                var response = await TryCatchRequest(m_LobbyService.LobbyApi.JoinLobbyByIdAsync, joinRequest);
+                var response = await TryCatchRequest(LobbyApiNames.JoinLobbyById, m_LobbyService.LobbyApi.JoinLobbyByIdAsync, joinRequest);
+                AddOrUpdateLobbyCache(response.Result);
                 return response.Result;
             }
             catch (LobbyServiceException e)
@@ -197,6 +202,7 @@ namespace Unity.Services.Lobbies.Internal
                     var lobby = await LobbyConflictResolver(options?.Player, lobbyId, e);
                     if (lobby != null)
                     {
+                        AddOrUpdateLobbyCache(lobby);
                         return lobby;
                     }
                 }
@@ -209,7 +215,7 @@ namespace Unity.Services.Lobbies.Internal
         {
             var queryRequest = options == null ? null : new QueryRequest(options.Count, options.Skip, options.SampleResults, options.Filters, options.Order, options.ContinuationToken);
             var queryLobbiesRequest = new QueryLobbiesRequest(queryRequest: queryRequest);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.QueryLobbiesAsync, queryLobbiesRequest);
+            var response = await TryCatchRequest(LobbyApiNames.QueryLobbies, m_LobbyService.LobbyApi.QueryLobbiesAsync, queryLobbiesRequest);
             return response.Result;
         }
 
@@ -220,7 +226,7 @@ namespace Unity.Services.Lobbies.Internal
             {
                 var quickJoinRequest = options == null ? null : new QuickJoinRequest(options.Filter, options.Player);
                 var quickJoinLobbyRequest = new QuickJoinLobbyRequest(quickJoinRequest: quickJoinRequest);
-                var response = await TryCatchRequest(m_LobbyService.LobbyApi.QuickJoinLobbyAsync, quickJoinLobbyRequest);
+                var response = await TryCatchRequest(LobbyApiNames.QuickJoinLobby, m_LobbyService.LobbyApi.QuickJoinLobbyAsync, quickJoinLobbyRequest);
                 AddOrUpdateLobbyCache(response.Result);
                 return response.Result;
             }
@@ -252,7 +258,7 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException("playerId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
             var removePlayerRequest = new RemovePlayerRequest(lobbyId, playerId);
-            await TryCatchRequest(m_LobbyService.LobbyApi.RemovePlayerAsync, removePlayerRequest);
+            await TryCatchRequest(LobbyApiNames.RemovePlayer, m_LobbyService.LobbyApi.RemovePlayerAsync, removePlayerRequest);
         }
 
         /// <inheritdoc/>
@@ -269,7 +275,8 @@ namespace Unity.Services.Lobbies.Internal
 
             var updateRequest = new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId, options.Password);
             var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest: updateRequest);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.UpdateLobbyAsync, updateLobbyRequest);
+            var response = await TryCatchRequest(LobbyApiNames.UpdateLobby, m_LobbyService.LobbyApi.UpdateLobbyAsync, updateLobbyRequest);
+            AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
 
@@ -290,7 +297,8 @@ namespace Unity.Services.Lobbies.Internal
             }
             var playerUpdateRequest = options == null ? null : new PlayerUpdateRequest(options.ConnectionInfo, options.Data, options.AllocationId);
             var updatePlayerRequest = new UpdatePlayerRequest(lobbyId, playerId, playerUpdateRequest: playerUpdateRequest);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.UpdatePlayerAsync, updatePlayerRequest);
+            var response = await TryCatchRequest(LobbyApiNames.UpdatePlayer, m_LobbyService.LobbyApi.UpdatePlayerAsync, updatePlayerRequest);
+            AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
 
@@ -302,7 +310,7 @@ namespace Unity.Services.Lobbies.Internal
                 throw new ArgumentNullException("lobbyId", "Argument should be non-null, non-empty & not only whitespaces.");
             }
             var reconnectRequest = new ReconnectRequest(lobbyId);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.ReconnectAsync, reconnectRequest);
+            var response = await TryCatchRequest(LobbyApiNames.Reconnect, m_LobbyService.LobbyApi.ReconnectAsync, reconnectRequest);
             AddOrUpdateLobbyCache(response.Result);
             return response.Result;
         }
@@ -320,7 +328,7 @@ namespace Unity.Services.Lobbies.Internal
                 tokenRequestOptions.Add(new TokenRequest(tokenOption));
             }
             var requestTokensRequest = new RequestTokensRequest(lobbyId, tokenRequestOptions);
-            var response = await TryCatchRequest(m_LobbyService.LobbyApi.RequestTokensAsync, requestTokensRequest);
+            var response = await TryCatchRequest(LobbyApiNames.RequestTokens, m_LobbyService.LobbyApi.RequestTokensAsync, requestTokensRequest);
             return response.Result;
         }
 
@@ -332,12 +340,15 @@ namespace Unity.Services.Lobbies.Internal
         #region Helper Functions
 
         // Helper function to reduce code duplication of try-catch
-        private async Task<Response> TryCatchRequest<TRequest>(Func<TRequest, Configuration, Task<Response>> func, TRequest request)
+        private async Task<Response> TryCatchRequest<TRequest>(string api, Func<TRequest, Configuration, Task<Response>> func, TRequest request)
         {
             Response response = null;
             try
             {
-                response = await func(request, m_LobbyService.Configuration);
+                using (m_TelemetryScopeFactory.Instrument(api))
+                {
+                    response = await func(request, m_LobbyService.Configuration);
+                }
             }
             catch (HttpException<ErrorStatus> he)
             {
@@ -371,16 +382,20 @@ namespace Unity.Services.Lobbies.Internal
                 //Pass error code that will throw default label, provide exception object for stack trace.
                 ResolveErrorWrapping(LobbyExceptionReason.Unknown, e);
             }
+
             return response;
         }
 
         // Helper function to reduce code duplication of try-catch (generic version)
-        private async Task<Response<TReturn>> TryCatchRequest<TRequest, TReturn>(Func<TRequest, Configuration, Task<Response<TReturn>>> func, TRequest request)
+        private async Task<Response<TReturn>> TryCatchRequest<TRequest, TReturn>(string api, Func<TRequest, Configuration, Task<Response<TReturn>>> func, TRequest request)
         {
             Response<TReturn> response = null;
             try
             {
-                response = await func(request, m_LobbyService.Configuration);
+                using (m_TelemetryScopeFactory.Instrument(api))
+                {
+                    response = await func(request, m_LobbyService.Configuration);
+                }
             }
             catch (HttpException<ErrorStatus> he)
             {
@@ -414,6 +429,7 @@ namespace Unity.Services.Lobbies.Internal
                 //Pass error code that will throw default label, provide exception object for stack trace.
                 ResolveErrorWrapping(LobbyExceptionReason.Unknown, e);
             }
+
             return response;
         }
 
@@ -422,7 +438,6 @@ namespace Unity.Services.Lobbies.Internal
         {
             if (reason == LobbyExceptionReason.Unknown)
             {
-                Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int)reason}). Message: Something went wrong.");
                 throw new LobbyServiceException(reason, "Something went wrong.", exception);
             }
             else
@@ -435,13 +450,17 @@ namespace Unity.Services.Lobbies.Internal
                 HttpException<ErrorStatus> apiException = exception as HttpException<ErrorStatus>;
                 if (apiException != null)
                 {
-                    Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int) reason}). Message: {apiException.ActualError.Detail}");
-                    throw new LobbyServiceException(reason, apiException.ActualError.Detail, apiException);
+                    string message = apiException.ActualError.Detail;
+                    if (apiException.ActualError.Details != null && apiException.ActualError.Details.Any())
+                    {
+                        message += $"\n{string.Join(", ", apiException.ActualError.Details.Select(d => d.Message))}";
+                    }
+
+                    throw new LobbyServiceException(reason, message, apiException);
                 }
                 else
                 {
                     //Other general exception message handling
-                    Debug.LogError($"{Enum.GetName(typeof(LobbyExceptionReason), reason)}, ({(int)reason}). Message: {exception.Message}");
                     throw new LobbyServiceException(reason, exception.Message, exception);
                 }
             }

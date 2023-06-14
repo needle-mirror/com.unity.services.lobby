@@ -1,5 +1,6 @@
 generatorName: csharp-unity
 outputDir: ./generated
+templateDir: ./templates
 inputSpec: ./lobby-spec.yaml
 packageName: com.unity.services.lobby
 additionalProperties:
@@ -12,6 +13,10 @@ additionalProperties:
   unityPackageDescription: "Enable players to find, create, and join lobbies with Lobby. Add Lobby to your multiplayer game to empower players to create the gaming experiences they want. Features include Quick Join, Public Lobby, and Private Match to allow flexibility in how players want to game with each other."
   useUnityAuthentication: true
   publicAccess: [models, deserializable]
+files:
+  api-names.mustache:
+    templateType: API
+    destinationFilename: Names.cs
 x-recipeEngine:
   moveGeneratorFiles: true
   trackedDir: ./Packages/Public/com.unity.services.lobby

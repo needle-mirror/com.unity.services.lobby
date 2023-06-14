@@ -13,7 +13,7 @@ namespace Unity.Services.Lobbies
     /// </summary>
     public static class LobbyService
     {
-        private static ILobbyService service;
+        internal static ILobbyService service { get; set; }
 
         private static readonly Configuration configuration;
 
@@ -34,6 +34,11 @@ namespace Unity.Services.Lobbies
                     InitializeWrappedLobbyService();
                 }
                 return service;
+            }
+
+            internal set
+            {
+                service = value;
             }
         }
 

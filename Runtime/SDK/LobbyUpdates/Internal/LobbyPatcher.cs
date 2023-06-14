@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
 using UnityEngine.Scripting;
 
 internal static class LobbyPatcher
@@ -42,9 +40,14 @@ internal static class LobbyPatcher
 
     internal static void ApplyPatchesToLobby(ILobbyChanges changes, Lobby lobbyToChange)
     {
+        if (changes.Version.Value <= lobbyToChange.Version)
+        {
+            return;
+        }
+
         if (changes.LobbyDeleted)
         {
-            Debug.LogWarning(
+            Logger.LogWarning(
                 "Attempting to apply changes to lobby, but the lobby has been deleted. Check if a lobby has been deleted by checking .LobbyDeleted");
             return;
         }
@@ -100,10 +103,6 @@ internal static class LobbyPatcher
                 if (change.Value.Removed)
                 {
                     lobbyToChange.Data.Remove(change.Key);
-                }
-                else if (change.Value.Added)
-                {
-                    lobbyToChange.Data.Add(change.Key, change.Value.Value);
                 }
                 else
                 {
@@ -188,10 +187,6 @@ internal static class LobbyPatcher
                         if (keyValuePair.Value.Removed)
                         {
                             playerToChange.Data.Remove(keyValuePair.Key);
-                        }
-                        else if (keyValuePair.Value.Added)
-                        {
-                            playerToChange.Data.Add(keyValuePair.Key, keyValuePair.Value.Value);
                         }
                         else
                         {
@@ -400,13 +395,13 @@ internal static class LobbyPatcher
     {
         if (string.IsNullOrWhiteSpace(json))
         {
-            Debug.LogError("Unable to apply patches to lobby as the provided JSON was null!");
+            Logger.LogError("Unable to apply patches to lobby as the provided JSON was null!");
         }
 
         var lobbyPatches = JsonConvert.DeserializeObject<LobbyPatches>(json);
         if (lobbyPatches == null)
         {
-            Debug.LogError("Unable to deserialize JSON to LobbyPatches!");
+            Logger.LogError("Unable to deserialize JSON to LobbyPatches!");
         }
 
         return GetLobbyPatches(lobbyPatches);
@@ -416,7 +411,7 @@ internal static class LobbyPatcher
     {
         if (lobbyPatches.Patches == null || lobbyPatches.Patches.Count < 1)
         {
-            Debug.LogWarning("Attempting to apply patches to lobby, but there were no patches to apply.");
+            Logger.LogWarning("Attempting to apply patches to lobby, but there were no patches to apply.");
             return new LobbyPatcherChanges(lobbyPatches.Version);
         }
 
@@ -436,7 +431,7 @@ internal static class LobbyPatcher
             case "add": ParseAddPatch(patch, changes); break;
             case "replace": ParseReplacePatch(patch, changes); break;
             case "remove": ParseRemovePatch(patch, changes); break;
-            default: Debug.LogError($"patch.op({patch.op}) is not implemented by the {nameof(LobbyPatcher)}"); break;
+            default: Logger.LogError($"patch.op({patch.op}) is not implemented by the {nameof(LobbyPatcher)}"); break;
         }
     }
 
@@ -472,7 +467,7 @@ internal static class LobbyPatcher
                 { changes.HostChange((string)patch.value); break; }
                 case "/lastUpdated":
                 { changes.LastUpdatedChange((DateTime)patch.value); break; }
-                default: Debug.LogError($"Not implemented add patch with path[{patch.path}]"); break;
+                default: Logger.LogError($"Not implemented add patch with path[{patch.path}]"); break;
             }
         }
     }
@@ -507,7 +502,7 @@ internal static class LobbyPatcher
                 { changes.HostChange((string)patch.value); break; }
                 case "/lastUpdated":
                 { changes.LastUpdatedChange((DateTime)patch.value); break; }
-                default: Debug.LogError($"Not implemented replace patch with path[{patch.path}]"); break;
+                default: Logger.LogError($"Not implemented replace patch with path[{patch.path}]"); break;
             }
         }
     }
@@ -544,7 +539,7 @@ internal static class LobbyPatcher
                 { changes.HostChange(null); break; }
                 case "/":
                 { changes.LobbyDeletedChange(); break; }
-                default: Debug.LogError($"Not implemented remove patch with path[{patch.path}]"); break;
+                default: Logger.LogError($"Not implemented remove patch with path[{patch.path}]"); break;
             }
         }
     }
@@ -627,7 +622,7 @@ internal static class LobbyPatcher
                 { ParseAddPlayer(patch, index, changes); break; }
                 case "/connectionInfo":
                 { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
-                default: Debug.LogError($"Not implemented add player patch with path[{path}] from player patch[{patch.path}]"); break;
+                default: Logger.LogError($"Not implemented add player patch with path[{path}] from player patch[{patch.path}]"); break;
             }
         }
     }
@@ -647,7 +642,7 @@ internal static class LobbyPatcher
                 { changes.PlayerConnectionInfoChange(index, (string)patch.value); break; }
                 case "/lastUpdated":
                 { changes.PlayerLastUpdatedChange(index, (DateTime)patch.value); break; }
-                default: Debug.LogError($"Not implemented replace player patch with path[{path}]"); break;
+                default: Logger.LogError($"Not implemented replace player patch with path[{path}]"); break;
             }
         }
     }
@@ -667,7 +662,7 @@ internal static class LobbyPatcher
                 { changes.PlayerLeftChange(index); break; }
                 case "/connectionInfo":
                 { changes.PlayerConnectionInfoChange(index, null); break; }
-                default: Debug.LogError($"Not implemented remove player patch with path[{path}]"); break;
+                default: Logger.LogError($"Not implemented remove player patch with path[{path}]"); break;
             }
         }
     }

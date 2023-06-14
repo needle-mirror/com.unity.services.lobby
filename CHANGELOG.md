@@ -5,6 +5,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.5] - 2023-06-14
+* Added the new `InvalidJoinCode` error code
+* Added the `ApiError` property to `LobbyServiceException`
+* Updated exception messages to include full HTTP error details
+* Removed error logs from HTTP exceptions
+* Fixed missing updates to the internal lobby cache
+* Updated Services Core to 1.8.2
+* Updated Wire to 1.1.8
+
 ## [1.1.0-pre.4] - 2023-03-28
 
 * Added more specific LobbyEvents

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Unity.Services.Authentication.Internal;
 using Unity.Services.Vivox.Internal;
@@ -26,7 +27,8 @@ namespace Unity.Services.Lobbies.Internal
 
         public async Task<string> GetTokenAsync(string issuer = null, TimeSpan? expiration = null, string userUri = null, string action = null, string conferenceUri = null, string fromUserUri = null, string realm = null)
         {
-            if (conferenceUri == null) {
+            if (conferenceUri == null)
+            {
                 throw new InvalidOperationException($"Unable to get Token for null lobbyId[{conferenceUri}]!");
             }
 
@@ -35,7 +37,7 @@ namespace Unity.Services.Lobbies.Internal
             {
                 throw new InvalidOperationException("Unable to get environmentId! Therefore, we are unable to get the channel name!");
             }
-            var lobbyId = ExtractChannelNameFromConferenceUri(conferenceUri, environmentId);
+            var lobbyId = ExtractChannelNameFromConferenceUri(conferenceUri);
 
             var response = await m_LobbyService.RequestTokensAsync(lobbyId, Models.TokenRequest.TokenTypeOptions.VivoxJoin);
             if (response == null)
@@ -43,7 +45,8 @@ namespace Unity.Services.Lobbies.Internal
                 throw new InvalidOperationException($"{nameof(m_LobbyService.RequestTokensAsync)} response was null!");
             }
 
-            if (!response.TryGetValue(k_VivoxJoinTokenKey, out var tokenData)) {
+            if (!response.TryGetValue(k_VivoxJoinTokenKey, out var tokenData))
+            {
                 var builder = new StringBuilder($"Failed to get Vivox Token for Lobby using key[{k_VivoxJoinTokenKey} Response contained the following tokens:\n");
                 foreach (var token in response)
                 {
@@ -55,38 +58,16 @@ namespace Unity.Services.Lobbies.Internal
             return tokenData.TokenValue;
         }
 
-        internal static string ExtractChannelNameFromConferenceUri(string conferenceUri, string environmentId)
+        internal static string ExtractChannelNameFromConferenceUri(string conferenceUri)
         {
-            // conferenceUri is of the format:
-            //   sip:confctl-{GetUriDesignator(_type)}-{_issuer}.{_channelName}.{_environmentId}@{_domain}
-
-            environmentId = environmentId.Replace("-", "");
-
-            //   sip:confctl-{GetUriDesignator(_type)}-{_issuer}.{_channelName}.{_environmentId}@{_domain}
-            //                                                  ^ start                         ^ domainStart
-            var start = conferenceUri.IndexOf('.') + 1;
-            var domainStart = conferenceUri.LastIndexOf('@');
-            if (start == -1 || domainStart == -1) {
+            var matchGroups =
+                new Regex("sip:confctl-(?<uriDesignator>[a-zA-Z0-9]+)-(?<issuer>[a-zA-Z0-9-]+).(?<channelName>[a-zA-Z0-9]+).(?<environmentId>[a-zA-Z0-9-]+)@(?<domain>[a-zA-Z0-9.]+)")
+                    .Match(conferenceUri);
+            var channelName = matchGroups.Groups["channelName"].Value;
+            if (string.IsNullOrEmpty(channelName))
+            {
                 throw new InvalidOperationException($"Unable to parse channel name for lobby from conferenceUri[{conferenceUri}]! Expected the form: sip:confctl-{{GetUriDesignator(_type)}}-{{_issuer}}.{{_channelName}}.{{_environmentId}}@{{_domain}}");
             }
-
-            //   sip:confctl-{GetUriDesignator(_type)}-{_issuer}.{_channelName_____}.{_environmentId______}@{_domain_______}
-            //                                                   [-----------------] [--------------------][---------------]
-            //                                                   |channelNameLength| |environmentId.Length||domainLength   |
-            //                                                                      [--------------------------------------]
-            //                                                                      |trimRightLength                       |
-            var domainLength = conferenceUri.Length - domainStart;
-            var trimRightLength = environmentId.Length + domainLength + 1;
-            var channelNameLength = conferenceUri.Length - (start + trimRightLength);
-
-            if (channelNameLength < 0 || channelNameLength >= conferenceUri.Length - start) {
-                throw new InvalidOperationException($"Unable to parse channel name for lobby from conferenceUri[{conferenceUri}]! channelNameLength calculated as[{channelNameLength}], with trimRightLength[{trimRightLength}] and conferenceUri.Length[{conferenceUri.Length}]!");
-            }
-
-            // sip:confctl-g-24741-tanks-73903-test.P9Lapiqq2Dguvcx29ZQHUF.96c1f2e66e6342efbb0e070f612bae5c@mtu1xp.vivox.com
-            //                                      ^ start              |channelNameLength
-            //                                      [--------------------] gives us the channel name!
-            var channelName = conferenceUri.Substring(start, channelNameLength);
             return channelName;
         }
     }

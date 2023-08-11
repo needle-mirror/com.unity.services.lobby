@@ -61,7 +61,7 @@ namespace Unity.Services.Lobbies.Internal
         internal static string ExtractChannelNameFromConferenceUri(string conferenceUri)
         {
             var matchGroups =
-                new Regex("sip:confctl-(?<uriDesignator>[a-zA-Z0-9]+)-(?<issuer>[a-zA-Z0-9-]+).(?<channelName>[a-zA-Z0-9]+).(?<environmentId>[a-zA-Z0-9-]+)@(?<domain>[a-zA-Z0-9.]+)")
+                new Regex("sip:confctl-(?<uriDesignator>[a-zA-Z0-9]+)-(?<issuer>[a-zA-Z0-9-]+).(?<channelName>[^!|@]+)\\.(?<environmentId>[^!|@]+)(?:!p-([^@]+))?@(?<domain>[^@]+)")
                     .Match(conferenceUri);
             var channelName = matchGroups.Groups["channelName"].Value;
             if (string.IsNullOrEmpty(channelName))

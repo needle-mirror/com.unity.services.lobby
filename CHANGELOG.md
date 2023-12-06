@@ -5,7 +5,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2023-08-11
+## [1.1.2] - 2023-12-06
+* Fixed Lobby Vivox interoperability issues around joining certain channel types or joining channels that didn't match a Lobby ID when trying only to use the Vivox SDK while the Lobby SDK was present in the project.
+
+## [1.1.1] - 2023-11-08
 * Fixed the Vivox channel validation to allow for positional 3D channels
 
 ## [1.1.0] - 2023-07-25

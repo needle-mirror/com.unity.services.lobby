@@ -24,6 +24,8 @@ namespace Unity.Services.Lobbies.Internal
 
         private readonly ApiTelemetryScopeFactory m_TelemetryScopeFactory;
 
+        private bool m_LocalPlayerLobbyEventsEnabled = false;
+
         //Minimum value of a lobby error (used to elevate standard errors if unhandled)
         internal const int LOBBY_ERROR_MIN_RANGE = 16000;
 
@@ -276,7 +278,10 @@ namespace Unity.Services.Lobbies.Internal
             var updateRequest = new UpdateRequest(options.Name, options.MaxPlayers, options.IsPrivate, options.IsLocked, options.Data, options.HostId, options.Password);
             var updateLobbyRequest = new UpdateLobbyRequest(lobbyId, updateRequest: updateRequest);
             var response = await TryCatchRequest(LobbyApiNames.UpdateLobby, m_LobbyService.LobbyApi.UpdateLobbyAsync, updateLobbyRequest);
-            AddOrUpdateLobbyCache(response.Result);
+
+            if (!m_LocalPlayerLobbyEventsEnabled)
+                AddOrUpdateLobbyCache(response.Result);
+
             return response.Result;
         }
 
@@ -298,7 +303,10 @@ namespace Unity.Services.Lobbies.Internal
             var playerUpdateRequest = options == null ? null : new PlayerUpdateRequest(options.ConnectionInfo, options.Data, options.AllocationId);
             var updatePlayerRequest = new UpdatePlayerRequest(lobbyId, playerId, playerUpdateRequest: playerUpdateRequest);
             var response = await TryCatchRequest(LobbyApiNames.UpdatePlayer, m_LobbyService.LobbyApi.UpdatePlayerAsync, updatePlayerRequest);
-            AddOrUpdateLobbyCache(response.Result);
+
+            if (!m_LocalPlayerLobbyEventsEnabled)
+                AddOrUpdateLobbyCache(response.Result);
+
             return response.Result;
         }
 
@@ -335,6 +343,11 @@ namespace Unity.Services.Lobbies.Internal
         public void SetBasePath(string basePath)
         {
             m_LobbyService.Configuration.BasePath = basePath;
+        }
+
+        public void EnableLocalPlayerLobbyEvents(bool enabled)
+        {
+            m_LocalPlayerLobbyEventsEnabled = enabled;
         }
 
         #region Helper Functions

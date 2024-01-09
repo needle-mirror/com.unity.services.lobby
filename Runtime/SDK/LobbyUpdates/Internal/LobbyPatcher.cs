@@ -333,13 +333,13 @@ internal static class LobbyPatcher
 
                 // if the data has been completely removed
                 if (oldLobbyPlayer.Data != null && newLobbyPlayer.Data == null)
-                    changes.PlayerDataRemoveChange(playerIdx);
+                    changes.PlayerDataRemoveChange(newLobbyPlayerIdx);
                 // if the data has been added from scratch
                 else if (oldLobbyPlayer.Data == null && newLobbyPlayer.Data != null)
                 {
                     foreach (var dataKey in newLobbyPlayer.Data.Keys)
                     {
-                        changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                        changes.PlayerDataAdded(newLobbyPlayerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
                     }
                 }
                 // if both are populated, we need a diff
@@ -349,7 +349,7 @@ internal static class LobbyPatcher
                     foreach (var dataKey in newLobbyPlayer.Data.Keys)
                     {
                         if (!oldLobbyPlayer.Data.ContainsKey(dataKey) || oldLobbyPlayer.Data[dataKey] == null)
-                            changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                            changes.PlayerDataAdded(newLobbyPlayerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
                     }
 
                     // Check for player data removed or changed
@@ -357,11 +357,11 @@ internal static class LobbyPatcher
                     foreach (var dataKey in oldLobbyPlayer.Data.Keys)
                     {
                         if (!newLobbyPlayer.Data.ContainsKey(dataKey) || newLobbyPlayer.Data[dataKey] == null)
-                            changes.PlayerDataRemoveChange(playerIdx, dataKey);
+                            changes.PlayerDataRemoveChange(newLobbyPlayerIdx, dataKey);
                         else if (oldLobbyPlayer.Data[dataKey] == null)
-                            changes.PlayerDataAdded(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                            changes.PlayerDataAdded(newLobbyPlayerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
                         else if (!IsPlayerDataEqual(oldLobbyPlayer.Data[dataKey], newLobbyPlayer.Data[dataKey]))
-                            changes.PlayerDataChange(playerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
+                            changes.PlayerDataChange(newLobbyPlayerIdx, dataKey, newLobbyPlayer.Data[dataKey]);
                     }
                 }
             }

@@ -1,7 +1,7 @@
 {
   "name": "com.unity.services.lobby",
   "displayName": "Lobby",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "unity": "2020.3",
   "_upm": {
     "gameService": {
@@ -10,7 +10,7 @@
       "projectDashboardUrlType": "OrganizationKeyAndProjectGuid",
       "useCasesUrl": "https://docs.unity.com/lobby/Content/unity-lobby-service-overview.htm"
     },
-    "changelog": "* Fixed Lobby Vivox interoperability issues around joining certain channel types or joining channels that didn't match a Lobby ID when trying only to use the Vivox SDK while the Lobby SDK was present in the project."
+    "changelog": "* Added `EnableLocalPlayerLobbyEvents` to enable/disable Lobby events triggered by the local player"
   },
   "description": "Enable players to find, create, and join lobbies with Lobby. Add Lobby to your multiplayer game to empower players to create the gaming experiences they want. Features include Quick Join, Public Lobby, and Private Match to allow flexibility in how players want to game with each other.",
   "dependencies": {
@@ -32,15 +32,15 @@
     }
   ],
   "relatedPackages": {
-    "com.unity.services.lobby.tests": "1.1.2"
+    "com.unity.services.lobby.tests": "1.2.0"
   },
   "upmCi": {
-    "footprint": "92de8238d15e479def6890e6a9953baead36fc54"
+    "footprint": "e4f3b5d51efe4671aa8ebd19fb5f1105828010dd"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.lobby@1.1/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.services.lobby@1.2/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/operate-services-sdk.git",
     "type": "git",
-    "revision": "884fc6c024ed2ac79c1402861cfa70b639818a1f"
+    "revision": "5176833d791de3aacf5d29e77d2ae14b3bfd423f"
   }
 }

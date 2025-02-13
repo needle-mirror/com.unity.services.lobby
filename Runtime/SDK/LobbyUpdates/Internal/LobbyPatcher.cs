@@ -9,7 +9,7 @@ using UnityEngine.Scripting;
 
 internal static class LobbyPatcher
 {
-    private const int MaxPlayerCount = 100;
+    private const int MaxPlayerCount = 150;
 
     internal class LobbyPatch
     {

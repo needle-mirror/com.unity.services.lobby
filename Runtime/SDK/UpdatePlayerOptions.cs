@@ -4,7 +4,7 @@ using Unity.Services.Lobbies.Models;
 namespace Unity.Services.Lobbies
 {
     /// <summary>
-    /// Paramters to update on a given UpdatePlayer request.
+    /// Parameters to update on a given UpdatePlayer request.
     /// </summary>
     public class UpdatePlayerOptions 
     {

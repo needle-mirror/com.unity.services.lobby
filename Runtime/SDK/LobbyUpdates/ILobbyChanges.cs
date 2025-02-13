@@ -35,12 +35,14 @@ namespace Unity.Services.Lobbies
         /// </summary>
         ChangedLobbyValue<bool> HasPassword { get; }
 
+        /// <summary>
         /// The change to the available slots in the lobby, if it has changed.
         /// </summary>
         ChangedLobbyValue<int> AvailableSlots { get; }
 
         /// <summary>
-        /// The change to the maximum number of players in the lobby, if it has changed.
+        /// The change to the maximum number of players in the lobby, if it has
+        /// changed.
         /// </summary>
         ChangedLobbyValue<int> MaxPlayers { get; }
 
@@ -80,8 +82,10 @@ namespace Unity.Services.Lobbies
         ChangedLobbyValue<DateTime> LastUpdated { get; }
 
         /// <summary>
-        /// Takes a lobby and a change applicator to update a given lobby in-place.
-        /// If LobbyDeleted is true, no changes will be applied and a warning will be logged.
+        /// Takes a lobby and a change applicator to update a given lobby
+        /// in-place.
+        /// If LobbyDeleted is true, no changes will be applied and a warning
+        /// will be logged.
         /// </summary>
         /// <param name="lobby">The lobby model to apply the changes to.</param>
         void ApplyToLobby(Models.Lobby lobby);

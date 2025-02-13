@@ -45,8 +45,8 @@ namespace Unity.Services.Lobbies
         /// <summary>
         /// Provides a removed lobby value.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of the value to remove.</typeparam>
+        /// <returns>A removed lobby value.</returns>
         public static ChangedOrRemovedLobbyValue<T> Removed<T>() => ChangedOrRemovedLobbyValue<T>.RemoveThisValue;
     }
 }

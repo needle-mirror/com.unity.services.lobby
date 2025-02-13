@@ -1,4 +1,4 @@
-Unity Lobby SDK copyright © 2023 Unity Technologies.
+Lobby copyright © 2023 Unity Technologies.
 
 This software is subject to, and made available under, the Unity Terms of Service (see https://unity.com/legal). Your use of this software constitutes your acceptance of such terms.
 

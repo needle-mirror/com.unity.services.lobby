@@ -21,8 +21,7 @@ public class LobbyEventCallbacks
 
     /// <summary>
     /// Event called when a player leave has occurred to a lobby on the server.
-    /// (See <see cref="LobbyPatcher.ApplyPatchesToLobby"/>)
-    /// <returns>The indices of the players who left.</returns>
+    /// See <see cref="LobbyPatcher.ApplyPatchesToLobby"/>.
     /// </summary>
     public event Action<List<int>> PlayerLeft;
 

@@ -957,7 +957,7 @@
                         "type": "integer",
                         "format": "int32",
                         "minimum": 1,
-                        "maximum": 100,
+                        "maximum": 150,
                         "description": "The maximum number of players that can be members of the lobby."
                     },
                     "availableSlots": {
@@ -1293,7 +1293,7 @@
                         "format": "int32",
                         "description": "The maximum number of players that can be members of the lobby.",
                         "minimum": 1,
-                        "maximum": 100
+                        "maximum": 150
                     },
                     "isPrivate": {
                         "type": "boolean",
@@ -1673,7 +1673,7 @@
                         "nullable": true,
                         "description": "The maximum number of players that can be members of the lobby.  Must be greater than or equal to the current number of players in the lobby.",
                         "minimum": 1,
-                        "maximum": 100
+                        "maximum": 150
                     },
                     "isPrivate": {
                         "type": "boolean",

@@ -16,7 +16,7 @@ namespace Unity.Services.Lobbies
 
         /// <summary>
         /// The maximum number of players allowed in the lobby. Must be greater than or equal to the current number of players in the lobby.
-        /// Minimum: 1. Maximum: 100.
+        /// Minimum: 1. Maximum: 150.
         /// </summary>
         public int? MaxPlayers { get; set; }
 

@@ -50,6 +50,7 @@ namespace Unity.Services.Lobbies
         /// </summary>
         NoOpenLobbies = 16006,
 
+        /// <summary>
         /// The Lobby cannot be created because it already exists.
         /// </summary>
         LobbyAlreadyExists = 16007,
